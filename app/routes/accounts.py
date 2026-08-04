@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.accounts.repository import AccountRepository
 from app.accounts.service import AccountCreate, AccountService
 from app.db.engine import get_session
+from app.security.dependencies import require_auth
 from app.schemas import (
     AccountCreateRequest,
     AccountListResponse,
@@ -19,7 +20,7 @@ from app.schemas import (
     TokenHealthStatus,
 )
 
-router = APIRouter(prefix="/api/accounts", tags=["accounts"])
+router = APIRouter(prefix="/api/accounts", tags=["accounts"], dependencies=[Depends(require_auth)])
 
 
 def _get_service(session: AsyncSession = Depends(get_session)) -> AccountService:

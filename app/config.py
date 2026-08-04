@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger("outlook_fusion")
 
 
 class Settings(BaseSettings):
@@ -26,6 +29,11 @@ class Settings(BaseSettings):
     APP_PASSWORD: str = "admin"
     LOCK_THRESHOLD: int = 5
     LOCK_DURATION_SECONDS: int = 3600
+
+    # --- 会话 / API key ---
+    SESSION_COOKIE_NAME: str = "of_session"
+    SESSION_TTL_SECONDS: int = 86400  # 24h 无活动过期
+    API_KEY_HEADER: str = "X-API-Key"
 
     # --- OAuth / Microsoft ---
     AUTHORITY: str = "https://login.microsoftonline.com/consumers"

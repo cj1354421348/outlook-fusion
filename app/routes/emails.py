@@ -11,8 +11,9 @@ from app.accounts.repository import AccountRepository
 from app.db.engine import get_session
 from app.email import email_service
 from app.schemas import DualViewEmailResponse, EmailDetailsResponse, EmailListResponse
+from app.security.dependencies import require_auth
 
-router = APIRouter(prefix="/api/emails", tags=["emails"])
+router = APIRouter(prefix="/api/emails", tags=["emails"], dependencies=[Depends(require_auth)])
 
 
 def _get_repo(session: AsyncSession = Depends(get_session)) -> AccountRepository:

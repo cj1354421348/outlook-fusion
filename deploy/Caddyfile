@@ -1,0 +1,25 @@
+# Caddy 反向代理配置（域名占位）
+# 部署时替换 your-domain.com 为实际域名，并确保 DNS A 记录指向服务器
+# 与 AZURE_SETUP.md 的 redirect URI 同步更新
+
+your-domain.com {
+    # 生产必须 HTTPS（Caddy 自动申请证书）
+    reverse_proxy app:8000
+
+    # 限制上传大小（批量导入文本）
+    request_body {
+        max_size 2MB
+    }
+
+    # 安全头
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy same-origin
+    }
+}
+
+# 开发环境可用 localhost 测试（无证书）
+# http://localhost {
+#     reverse_proxy 127.0.0.1:8000
+# }

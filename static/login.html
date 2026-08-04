@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outlook Fusion - 登录</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb30 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .card {
+    background: #fff; border-radius: 12px; padding: 40px 36px; width: 360px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 6px; color: #1a2a6c; }
+  .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+  label { display: block; font-size: 13px; color: #555; margin: 14px 0 6px; }
+  input {
+    width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px;
+    font-size: 14px; outline: none; transition: border .2s;
+  }
+  input:focus { border-color: #1a2a6c; }
+  button {
+    width: 100%; margin-top: 24px; padding: 11px; border: none; border-radius: 6px;
+    background: #1a2a6c; color: #fff; font-size: 15px; cursor: pointer; transition: opacity .2s;
+  }
+  button:hover { opacity: .88; }
+  .error { color: #c0392b; font-size: 13px; margin-top: 14px; text-align: center; min-height: 18px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Outlook Fusion</h1>
+  <div class="sub">邮箱账户生命周期管理系统</div>
+  <form id="loginForm">
+    <label for="username">用户名</label>
+    <input id="username" autocomplete="username" required>
+    <label for="password">密码</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button type="submit">登 录</button>
+    <div class="error" id="error"></div>
+  </form>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('error');
+  err.textContent = '';
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    if (res.ok) { window.location.href = '/'; }
+    else {
+      const data = await res.json().catch(() => ({}));
+      err.textContent = data.detail || '登录失败';
+    }
+  } catch (ex) { err.textContent = '网络错误: ' + ex.message; }
+});
+</script>
+</body>
+</html>

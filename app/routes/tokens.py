@@ -11,8 +11,9 @@ from app.notify import notify_refresh_summary
 from app.oauth import detect_protocol, refresh_token_for_account
 from app.scheduler import scheduler
 from app.schemas import StatusResponse
+from app.security.dependencies import require_auth
 
-router = APIRouter(prefix="/api/tokens", tags=["tokens"])
+router = APIRouter(prefix="/api/tokens", tags=["tokens"], dependencies=[Depends(require_auth)])
 
 
 @router.post("/{email}/refresh", response_model=StatusResponse)
