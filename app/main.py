@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.config import logger
 from app.routes.accounts import router as accounts_router
+from app.routes.emails import router as emails_router
 from app.routes.tokens import router as tokens_router
 from app.scheduler import scheduler
 
@@ -62,6 +63,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(accounts_router)
 app.include_router(tokens_router)
+app.include_router(emails_router)
 
 
 if __name__ == "__main__":

@@ -60,3 +60,48 @@ class TokenHealthStatus(BaseModel):
     active: int
     expired: int
     needs_reauth: int
+
+
+# ---------- P4 邮件读取 ----------
+
+
+class EmailItem(BaseModel):
+    message_id: str
+    folder: str
+    subject: str
+    from_email: str
+    date: str
+    is_read: bool = False
+    has_attachments: bool = False
+    sender_initial: str = "?"
+    uid: str | None = None
+
+
+class EmailListResponse(BaseModel):
+    email_id: str
+    folder_view: str
+    page: int
+    page_size: int
+    total_emails: int
+    emails: list[EmailItem]
+    from_cache: bool = False
+
+
+class DualViewEmailResponse(BaseModel):
+    email_id: str
+    inbox_emails: list[EmailItem]
+    junk_emails: list[EmailItem]
+    inbox_total: int
+    junk_total: int
+
+
+class EmailDetailsResponse(BaseModel):
+    message_id: str
+    subject: str
+    from_email: str
+    to_email: str
+    date: str
+    body_plain: str | None = None
+    body_html: str | None = None
+    uid: str | None = None
+    from_cache: bool = False
