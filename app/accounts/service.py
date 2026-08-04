@@ -44,3 +44,19 @@ class AccountService:
             }
             for a in accounts
         ]
+
+    async def mark_status(self, email: str, status: str, reason: str | None = None) -> None:
+        account = await self._repo.mark_status(email, status, reason)
+        if account is None:
+            raise ValueError(f"账户不存在: {email}")
+
+    async def delete(self, email: str) -> bool:
+        return await self._repo.delete(email)
+
+    async def health_summary(self) -> dict:
+        accounts = await self._repo.list_all()
+        total = len(accounts)
+        active = sum(1 for a in accounts if a.status == "active")
+        expired = sum(1 for a in accounts if a.status == "expired")
+        needs_reauth = sum(1 for a in accounts if a.status == "needs_reauth")
+        return {"total": total, "active": active, "expired": expired, "needs_reauth": needs_reauth}

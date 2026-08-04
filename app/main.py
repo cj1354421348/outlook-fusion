@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
+from app.routes.accounts import router as accounts_router
 
 
 def _assert_single_worker() -> None:
@@ -53,6 +54,8 @@ async def health() -> dict[str, str]:
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+app.include_router(accounts_router)
 
 
 if __name__ == "__main__":
