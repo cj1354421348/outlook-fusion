@@ -44,6 +44,17 @@ class StatusResponse(BaseModel):
     email: str
 
 
+class BatchImportRequest(BaseModel):
+    """批量导入：每行 邮箱----密码----client_id----令牌"""
+    text: str = Field(min_length=1)
+
+
+class BatchImportResult(BaseModel):
+    success: int
+    failed: int
+    errors: list[str]
+
+
 class TokenHealthStatus(BaseModel):
     total: int
     active: int

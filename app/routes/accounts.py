@@ -13,6 +13,8 @@ from app.schemas import (
     AccountListResponse,
     AccountResponse,
     AccountStatusRequest,
+    BatchImportRequest,
+    BatchImportResult,
     StatusResponse,
     TokenHealthStatus,
 )
@@ -42,6 +44,16 @@ async def register_account(
     payload = AccountCreate(email=body.email, client_id=body.client_id, tags=body.tags, note=body.note)
     await service.register(payload, body.refresh_token)
     return StatusResponse(message="账户注册成功", email=body.email)
+
+
+@router.post("/batch", response_model=BatchImportResult, status_code=201)
+async def batch_import_accounts(
+    body: BatchImportRequest,
+    service: AccountService = Depends(_get_service),
+) -> BatchImportResult:
+    """批量导入：每行 邮箱----密码----client_id----令牌"""
+    result = await service.batch_import(body.text)
+    return BatchImportResult(**result)
 
 
 @router.delete("/{email}", response_model=StatusResponse)
