@@ -10,8 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
+from app.config import logger
 from app.routes.accounts import router as accounts_router
 from app.routes.tokens import router as tokens_router
+from app.scheduler import scheduler
 
 
 def _assert_single_worker() -> None:
@@ -27,9 +29,11 @@ def _assert_single_worker() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _assert_single_worker()
-    # TODO(P3): 启动 TokenHealthScheduler / RefreshScheduler
+    scheduler.start()
+    logger.info("Outlook Fusion started (scheduler enabled, interval=%sh)", settings.REFRESH_INTERVAL_HOURS)
     yield
-    # TODO(P3): 关闭调度器
+    await scheduler.stop()
+    logger.info("Outlook Fusion shutdown complete")
 
 
 app = FastAPI(

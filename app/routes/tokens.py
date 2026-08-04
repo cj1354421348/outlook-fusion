@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.accounts.repository import AccountRepository
 from app.db.engine import get_session
+from app.notify import notify_refresh_summary
 from app.oauth import detect_protocol, refresh_token_for_account
+from app.scheduler import scheduler
 from app.schemas import StatusResponse
 
 router = APIRouter(prefix="/api/tokens", tags=["tokens"])
@@ -34,7 +36,7 @@ async def refresh_single(email: str, session: AsyncSession = Depends(get_session
 
 @router.post("/refresh-all", response_model=StatusResponse)
 async def refresh_all(session: AsyncSession = Depends(get_session)) -> StatusResponse:
-    """批量刷新所有账户（跳过 expired）。"""
+    """批量刷新所有账户（跳过 expired）并发送通知。"""
     repo = AccountRepository(session)
     accounts = await repo.list_all()
     success = 0
@@ -53,4 +55,12 @@ async def refresh_all(session: AsyncSession = Depends(get_session)) -> StatusRes
             failed += 1
 
     await session.commit()
+    await notify_refresh_summary(success, failed, success + failed)
     return StatusResponse(message=f"刷新完成: 成功 {success}, 失败 {failed}", email="*")
+
+
+@router.post("/trigger-scheduler", response_model=StatusResponse)
+async def trigger_scheduler() -> StatusResponse:
+    """手动触发调度器立即执行一轮刷新。"""
+    await scheduler.trigger_immediate()
+    return StatusResponse(message="调度器已手动触发", email="*")
