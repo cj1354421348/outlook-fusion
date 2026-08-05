@@ -59,7 +59,8 @@ class Settings(BaseSettings):
 
     # --- 平台保活（Render 等免费实例防休眠）---
     KEEPALIVE_URL: str = ""  # 手动指定公网 URL（留空则用 RENDER_EXTERNAL_URL）
-    KEEPALIVE_INTERVAL_MINUTES: int = 10  # 必须 < 平台休眠阈值（Render = 15min）
+    KEEPALIVE_MIN_INTERVAL_MINUTES: int = 1  # 随机间隔下限（分钟）
+    KEEPALIVE_INTERVAL_MINUTES: int = 10  # 随机间隔上限（分钟），上限须 < 平台休眠阈值（Render = 15min）
 
     # --- 通知 ---
     NOTIFY_API_URL: str = ""
