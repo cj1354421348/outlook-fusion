@@ -39,7 +39,11 @@ class KeepAlive:
 
     def start(self) -> None:
         if not self.enabled:
-            logger.info("KeepAlive disabled (KEEPALIVE_URL / RENDER_EXTERNAL_URL 为空)")
+            logger.warning(
+                "KeepAlive DISABLED: KEEPALIVE_URL 与 RENDER_EXTERNAL_URL 均为空。"
+                "Render 未注入 RENDER_EXTERNAL_URL 时，请在面板手动设置 KEEPALIVE_URL=%s/health 的域名。",
+                self._base_url or "<你的公网域名>",
+            )
             return
         if self._task is not None and not self._task.done():
             return

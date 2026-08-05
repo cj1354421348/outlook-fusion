@@ -19,6 +19,26 @@ from app.routes.web import router as web_router
 from app.scheduler import scheduler
 from app.scheduler.keepalive import keepalive
 
+APP_VERSION = "0.1.0"
+
+
+def _print_banner() -> None:
+    """启动横幅：打印版本号/commit/运行环境，便于云端确认部署版本。"""
+    git_sha = os.getenv("GIT_SHA", "unknown")[:12]
+    git_ref = os.getenv("GIT_REF", "unknown")
+    port = os.getenv("PORT", "8000")
+    keepalive_state = "ENABLED" if keepalive.enabled else "DISABLED (需手动设置 KEEPALIVE_URL)"
+    print(
+        "=" * 64,
+        f"  Outlook Fusion v{APP_VERSION}",
+        f"  git: {git_ref} @ {git_sha}",
+        f"  port: {port} | keepalive: {keepalive_state}",
+        f"  db: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL}",
+        "=" * 64,
+        sep="\n",
+        flush=True,
+    )
+
 
 def _assert_single_worker() -> None:
     """单实例硬约束：进程内缓存/会话/连接池/刷新锁均依赖单一进程。"""
@@ -32,6 +52,7 @@ def _assert_single_worker() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _print_banner()
     _assert_single_worker()
     scheduler.start()
     keepalive.start()

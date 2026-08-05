@@ -1,5 +1,11 @@
 FROM python:3.12-slim
 
+# 构建时注入版本信息（workflow build-args 传入）
+ARG GIT_SHA=unknown
+ARG GIT_REF=unknown
+ENV GIT_SHA=$GIT_SHA
+ENV GIT_REF=$GIT_REF
+
 # curl 用于 healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*

@@ -8,7 +8,15 @@ from functools import lru_cache
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# 显式配置：确保 INFO 级日志在所有运行环境（含 uvicorn dictConfig 后）可见
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    force=True,
+)
 logger = logging.getLogger("outlook_fusion")
+logger.setLevel(logging.INFO)
+logger.disabled = False  # 防止 uvicorn dictConfig 的 disable_existing_loggers 吞掉
 
 
 class Settings(BaseSettings):
