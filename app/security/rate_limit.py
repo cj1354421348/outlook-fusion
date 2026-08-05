@@ -6,7 +6,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass
 
-from app.config import LOCK_DURATION_SECONDS, LOCK_THRESHOLD, logger
+from app.config import logger, settings
 
 
 @dataclass
@@ -24,9 +24,9 @@ class FailureRegistry:
         with self._lock:
             entry = self._store[ip]
             entry.count += 1
-            if entry.count >= LOCK_THRESHOLD:
-                entry.locked_until = time.time() + LOCK_DURATION_SECONDS
-                logger.warning("IP %s 触发登录锁定 %s 秒", ip, LOCK_DURATION_SECONDS)
+            if entry.count >= settings.LOCK_THRESHOLD:
+                entry.locked_until = time.time() + settings.LOCK_DURATION_SECONDS
+                logger.warning("IP %s 触发登录锁定 %s 秒", ip, settings.LOCK_DURATION_SECONDS)
 
     def reset(self, ip: str) -> None:
         with self._lock:

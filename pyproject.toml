@@ -1,7 +1,7 @@
 [project]
 name = "outlook-fusion"
 version = "0.1.0"
-description = "Outlook 邮箱账户全生命周期管理系统：OAuth 授权 → token 保活 → 健康检查 → 邮件读取（IMAP/Graph）"
+description = "Outlook 邮箱账户全生命周期管理系统：OAuth 授权 → token 保活 → 健康检查 → 邮件读取（IMAP/Graph 双协议）"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.115.6",

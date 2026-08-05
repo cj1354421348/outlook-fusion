@@ -27,15 +27,11 @@ _pool: dict[str, list[aioimaplib.IMAP4_SSL]] = {}
 _pool_count: dict[str, int] = {}
 
 
-def _auth_string(email: str, access_token: str) -> bytes:
-    return f"user={email}\x01auth=Bearer {access_token}\x01\x01".encode("utf-8")
-
-
 async def _connect(email: str, access_token: str, host: str) -> aioimaplib.IMAP4_SSL:
     try:
         client = aioimaplib.IMAP4_SSL(host=host, port=settings.IMAP_PORT, timeout=settings.SOCKET_TIMEOUT)
         await client.wait_hello_from_server()
-        resp = await client.authenticate("XOAUTH2", lambda _: _auth_string(email, access_token))
+        resp = await client.xoauth2(email, access_token)
         if resp.result != "OK":
             raise ConnectionError(f"XOAUTH2 认证失败: {resp.result} {resp.lines}")
         return client

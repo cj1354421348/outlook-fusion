@@ -30,8 +30,21 @@ def decode_header_value(header_value: str) -> str:
         return str(header_value) if header_value else ""
 
 
+_HTML_TAG_RE = re.compile(r"<[^>]*>")
+_HTML_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def strip_html(html: str) -> str:
+    """剥离 HTML 标签，保留文本内容。"""
+    text = _HTML_TAG_RE.sub(" ", html)
+    text = _HTML_WHITESPACE_RE.sub(" ", text)
+    return text.strip()
+
+
 def extract_email_content(msg: email.message.EmailMessage) -> tuple[str, str]:
-    """递归提取正文，返回 (body_plain, body_html)。"""
+    """递归提取正文，返回 (body_plain, body_html)。
+    纯 HTML 邮件时 body_plain 为剥离标签后的文本。
+    """
     body_plain = ""
     body_html = ""
 
@@ -68,7 +81,12 @@ def extract_email_content(msg: email.message.EmailMessage) -> tuple[str, str]:
     except Exception as exc:  # noqa: BLE001
         logger.error("正文提取失败: %s", exc)
 
-    return body_plain.strip(), body_html.strip()
+    body_plain = body_plain.strip()
+    body_html = body_html.strip()
+    # 纯 HTML 邮件：剥离标签作为纯文本回退
+    if not body_plain and body_html:
+        body_plain = strip_html(body_html)
+    return body_plain, body_html
 
 
 def extract_sender_initial(from_email: str) -> str:

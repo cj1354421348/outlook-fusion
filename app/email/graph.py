@@ -5,7 +5,7 @@ import httpx
 from fastapi import HTTPException
 
 from app.config import logger
-from app.email.message import extract_sender_initial
+from app.email.message import extract_sender_initial, strip_html
 from app.schemas import EmailDetailsResponse, EmailItem, EmailListResponse
 
 GRAPH_BASE = "https://graph.microsoft.com/v1.0"
@@ -96,7 +96,7 @@ async def get_email_details(
         to_email=", ".join(to_list),
         date=data.get("receivedDateTime", ""),
         body_html=content if is_html else None,
-        body_plain=None if is_html else content or None,
+        body_plain=strip_html(content) if is_html else content or None,
     )
 
 

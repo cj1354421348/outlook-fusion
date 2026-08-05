@@ -5,124 +5,239 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Outlook Fusion - 控制台</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f4f6fa; color: #222; }
-  header {
-    background: #1a2a6c; color: #fff; padding: 14px 24px; display: flex;
-    align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10;
-  }
-  header h1 { font-size: 18px; font-weight: 600; }
-  header .actions button {
-    background: rgba(255,255,255,.15); color: #fff; border: none; padding: 7px 14px;
-    border-radius: 5px; margin-left: 8px; cursor: pointer; font-size: 13px;
-  }
-  header .actions button:hover { background: rgba(255,255,255,.28); }
-  .wrap { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-  .card h3 { font-size: 15px; margin-bottom: 12px; color: #1a2a6c; }
-  textarea {
-    width: 100%; height: 110px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;
-    font-size: 12px; font-family: Consolas, monospace; resize: vertical;
-  }
-  .btn {
-    background: #1a2a6c; color: #fff; border: none; padding: 8px 16px; border-radius: 5px;
-    cursor: pointer; font-size: 13px; margin-top: 10px;
-  }
-  .btn:hover { opacity: .88; }
-  .btn.ghost { background: #eef1f6; color: #333; }
-  .btn.danger { background: #c0392b; }
-  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; }
-  .stat { flex: 1; min-width: 120px; text-align: center; padding: 14px 8px; border-radius: 8px; background: #f8fafc; }
-  .stat .num { font-size: 26px; font-weight: 700; color: #1a2a6c; }
-  .stat .lbl { font-size: 12px; color: #888; margin-top: 4px; }
-  .msg { font-size: 13px; margin-top: 10px; min-height: 18px; }
-  .msg.ok { color: #27ae60; } .msg.err { color: #c0392b; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #eef1f6; }
-  th { background: #f8fafc; color: #555; font-weight: 600; white-space: nowrap; }
-  tr:hover td { background: #fafbfd; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
-  .badge.active { background: #e8f8ef; color: #1e8449; }
-  .badge.expired { background: #fdecea; color: #c0392b; }
-  .badge.needs_reauth { background: #fef5e7; color: #b9770e; }
-  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
-  .modal.open { display: flex; }
-  .modal-box { background: #fff; border-radius: 10px; width: 90%; max-width: 640px; max-height: 85vh; overflow: auto; padding: 24px; }
-  .modal-box h3 { margin-bottom: 14px; color: #1a2a6c; }
-  .modal-box .close { float: right; cursor: pointer; color: #888; font-size: 20px; }
-  .email-item { padding: 10px 12px; border-bottom: 1px solid #eef1f6; cursor: pointer; }
-  .email-item:hover { background: #f5f7fb; }
-  .email-item .subj { font-weight: 600; font-size: 13px; }
-  .email-item .meta { font-size: 12px; color: #888; margin-top: 3px; }
-  .email-body { font-size: 13px; line-height: 1.7; margin-top: 14px; white-space: pre-wrap; word-break: break-word; }
-  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-  .toolbar select, .toolbar input {
-    padding: 7px 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;
-  }
+/* ========== Design Tokens ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --c-primary: #2563eb; --c-primary-dark: #1d4ed8; --c-primary-light: #dbeafe;
+  --c-success: #10b981; --c-error: #ef4444; --c-warning: #f59e0b;
+  --c-bg: #f0f4f8; --c-card: #fff; --c-text: #1e293b; --c-text-muted: #64748b;
+  --c-border: #e2e8f0; --c-hover: #f8fafc; --c-header-bg: #0f172a;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 12px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,.08); --shadow-hover: 0 4px 12px rgba(0,0,0,.1);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,.2);
+  --dur-fast: 150ms; --dur-normal: 250ms; --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --font: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+body { font-family: var(--font); background: var(--c-bg); color: var(--c-text); min-height: 100vh; }
+
+/* ========== Animations ========== */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideOutRight { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes progressFill { from { width: 0%; } }
+
+/* ========== Utility ========== */
+.spinner { width: 20px; height: 20px; border: 2.5px solid var(--c-border); border-top-color: var(--c-primary); border-radius: 50%; animation: spin .6s linear infinite; display: inline-block; vertical-align: middle; }
+.spinner-sm { width: 14px; height: 14px; border-width: 2px; }
+.spinner-light { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
+.skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 4px; }
+
+/* ========== Toast ========== */
+#toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; padding: 12px 16px; border-radius: var(--radius-md); background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.15); display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 280px; max-width: 420px; animation: slideInRight .3s var(--ease-out) both; border-left: 3px solid var(--c-primary); }
+.toast.removing { animation: slideOutRight .25s ease-in both; }
+.toast.toast-success { border-left-color: var(--c-success); }
+.toast.toast-error { border-left-color: var(--c-error); }
+.toast.toast-warning { border-left-color: var(--c-warning); }
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-msg { flex: 1; color: var(--c-text); line-height: 1.4; }
+.toast-close { cursor: pointer; color: var(--c-text-muted); font-size: 16px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+.toast-close:hover { color: var(--c-text); }
+
+/* ========== Layout ========== */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+
+/* ========== Header ========== */
+header { background: var(--c-header-bg); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); box-shadow: 0 1px 0 rgba(255,255,255,.06); }
+.header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+header h1 { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+header h1 .badge { font-size: 10px; font-weight: 500; background: rgba(255,255,255,.12); padding: 2px 8px; border-radius: 10px; color: rgba(255,255,255,.7); }
+header .actions { display: flex; gap: 8px; }
+header .actions button { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.1); padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all var(--dur-fast); display: flex; align-items: center; gap: 6px; position: relative; }
+header .actions button:hover { background: rgba(255,255,255,.15); color: #fff; }
+header .actions button:active { transform: scale(.97); }
+header .actions button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+header .actions button.loading .refresh-icon { animation: spin .8s linear infinite; }
+header .actions button.loading .btn-label { visibility: hidden; }
+header .actions button.loading .btn-spinner { display: inline-block; }
+header .actions button .btn-spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; position: absolute; left: 50%; top: 50%; margin-left: -7px; margin-top: -7px; }
+
+/* ========== Grid / Cards ========== */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.card { background: var(--c-card); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-card); transition: box-shadow var(--dur-fast), transform var(--dur-fast); animation: fadeUp .4s var(--ease-out) both; }
+.card:hover { box-shadow: var(--shadow-hover); }
+.card h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--c-text); display: flex; align-items: center; gap: 8px; }
+.card h3 .icon-lg { font-size: 18px; }
+
+/* ========== Stats ========== */
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat { flex: 1; min-width: 100px; text-align: center; padding: 16px 8px; border-radius: var(--radius-sm); background: var(--c-bg); transition: transform var(--dur-fast); }
+.stat:hover { transform: translateY(-2px); }
+.stat .num { font-size: 26px; font-weight: 700; color: var(--c-primary); animation: countUp .5s var(--ease-out) both; }
+.stat .lbl { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
+.stat .num.active { color: var(--c-success); }
+.stat .num.expired { color: var(--c-error); }
+.stat .num.needs_reauth { color: var(--c-warning); }
+
+/* ========== Import ========== */
+textarea { width: 100%; height: 100px; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; font-family: var(--font-mono); resize: vertical; outline: none; transition: border-color var(--dur-fast), box-shadow var(--dur-fast); background: var(--c-bg); color: var(--c-text); }
+textarea:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); background: var(--c-card); }
+textarea::placeholder { color: #94a3b8; }
+.progress-wrap { margin-top: 10px; display: none; }
+.progress-wrap.active { display: block; }
+.progress-bar { height: 6px; background: var(--c-border); border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--c-primary), var(--c-primary-dark)); border-radius: 3px; transition: width .3s var(--ease-out); }
+.progress-text { font-size: 12px; color: var(--c-text-muted); margin-top: 6px; display: flex; justify-content: space-between; }
+.progress-text .prog-ok { color: var(--c-success); }
+.progress-text .prog-err { color: var(--c-error); }
+
+/* ========== Buttons ========== */
+.btn { display: inline-flex; align-items: center; gap: 6px; background: var(--c-primary); color: #fff; border: none; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 500; transition: all var(--dur-fast); white-space: nowrap; }
+.btn:hover { background: var(--c-primary-dark); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(37,99,235,.3); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn.ghost { background: var(--c-bg); color: var(--c-text); }
+.btn.ghost:hover { background: var(--c-border); box-shadow: none; transform: none; }
+.btn.danger { background: var(--c-error); }
+.btn.danger:hover { background: #dc2626; box-shadow: 0 2px 8px rgba(239,68,68,.3); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ========== Table ========== */
+.table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--c-border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: #f8fafc; color: var(--c-text-muted); font-weight: 600; text-align: left; padding: 10px 12px; white-space: nowrap; border-bottom: 1px solid var(--c-border); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+tbody td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; transition: background var(--dur-fast); }
+tbody tr:hover td { background: var(--c-hover); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.row-removing td { opacity: 0; transform: translateX(-20px); transition: all .25s ease; }
+
+/* ========== Badge ========== */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.badge.active { background: #ecfdf5; color: #065f46; }
+.badge.active .dot { background: var(--c-success); }
+.badge.expired { background: #fef2f2; color: #991b1b; }
+.badge.expired .dot { background: var(--c-error); }
+.badge.needs_reauth { background: #fffbeb; color: #92400e; }
+.badge.needs_reauth .dot { background: var(--c-warning); }
+
+/* ========== Actions ========== */
+.action-btns { display: flex; gap: 4px; flex-wrap: nowrap; }
+.action-btns .btn { font-size: 11px; padding: 4px 8px; }
+
+/* ========== Confirm ========== */
+.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 200; display: flex; align-items: center; justify-content: center; animation: fadeIn .15s ease; }
+.confirm-box { background: #fff; border-radius: var(--radius-lg); padding: 24px; max-width: 360px; width: 90%; box-shadow: var(--shadow-modal); animation: scaleIn .2s var(--ease-out); }
+.confirm-box h4 { font-size: 15px; margin-bottom: 8px; }
+.confirm-box p { font-size: 13px; color: var(--c-text-muted); margin-bottom: 16px; }
+.confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ========== Modal ========== */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal.open { display: flex; }
+.modal-box { background: #fff; border-radius: var(--radius-lg); width: 90%; max-width: 680px; max-height: 85vh; overflow: auto; padding: 28px; box-shadow: var(--shadow-modal); animation: scaleIn .25s var(--ease-out); position: relative; }
+.modal-box .close { position: absolute; top: 16px; right: 20px; cursor: pointer; color: var(--c-text-muted); font-size: 24px; line-height: 1; transition: color var(--dur-fast); }
+.modal-box .close:hover { color: var(--c-text); }
+.modal-box h3 { font-size: 17px; font-weight: 600; margin-bottom: 16px; color: var(--c-text); padding-right: 30px; }
+.modal-meta { font-size: 12px; color: var(--c-text-muted); margin-bottom: 12px; }
+.modal-meta div { margin-bottom: 3px; }
+.email-body { font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; padding: 16px; background: var(--c-bg); border-radius: var(--radius-sm); max-height: 50vh; overflow-y: auto; }
+
+/* ========== Email Cards ========== */
+.email-list { display: flex; flex-direction: column; gap: 4px; }
+.email-item { padding: 12px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--dur-fast), transform var(--dur-fast); border: 1px solid transparent; }
+.email-item:hover { background: var(--c-hover); border-color: var(--c-border); }
+.email-item:active { transform: scale(.995); }
+.email-item .subj { font-weight: 600; font-size: 13px; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-item .meta { font-size: 12px; color: var(--c-text-muted); margin-top: 3px; }
+.email-item .sender-initial { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--c-primary-light); color: var(--c-primary); font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.email-item .row-top { display: flex; align-items: center; gap: 10px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.toolbar select, .toolbar input { padding: 7px 10px; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); font-size: 13px; outline: none; background: var(--c-bg); color: var(--c-text); transition: border-color var(--dur-fast); }
+.toolbar select:focus, .toolbar input:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.toolbar select { cursor: pointer; }
+.toolbar .msg { font-size: 13px; color: var(--c-text-muted); margin-left: 4px; }
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .stat { min-width: 80px; padding: 12px 6px; } .stat .num { font-size: 20px; } header { padding: 0 16px; } .header-inner { height: 48px; } header h1 { font-size: 15px; } .wrap { padding: 0 12px 24px; } .card { padding: 14px; } .modal-box { padding: 20px; width: 95%; } .action-btns { flex-direction: column; } }
 </style>
 </head>
 <body>
+<div id="toastContainer"></div>
+
 <header>
-  <h1>📧 Outlook Fusion 控制台</h1>
-  <div class="actions">
-    <button onclick="loadAll()">刷新数据</button>
-    <button onclick="logout()">退出登录</button>
+  <div class="header-inner">
+    <h1>📧 Outlook Fusion <span class="badge">v0.1</span></h1>
+    <div class="actions">
+      <button id="refreshBtn" onclick="doRefresh()"><span class="refresh-icon">🔄</span> <span class="btn-label">刷新</span><span class="btn-spinner"></span></button>
+      <button id="refreshAllBtn" onclick="doRefreshAll()"><span>⚡</span> <span class="btn-label">全量刷新</span><span class="btn-spinner"></span></button>
+      <button onclick="doLogout()"><span>🚪</span> 退出</button>
+    </div>
   </div>
 </header>
 
 <div class="wrap">
   <div class="grid">
     <div class="card">
-      <h3>📊 Token 健康</h3>
+      <h3><span class="icon-lg">📊</span> Token 健康</h3>
       <div class="stat-row" id="healthStats">
-        <div class="stat"><div class="num">-</div><div class="lbl">总数</div></div>
-        <div class="stat"><div class="num">-</div><div class="lbl">正常</div></div>
-        <div class="stat"><div class="num">-</div><div class="lbl">已失效</div></div>
-        <div class="stat"><div class="num">-</div><div class="lbl">需重授权</div></div>
+        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">总数</div></div>
+        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">正常</div></div>
+        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">已失效</div></div>
+        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">需重授权</div></div>
       </div>
     </div>
     <div class="card">
-      <h3>⚡ 批量导入账户</h3>
-      <textarea id="batchText" placeholder="每行一条：邮箱----密码----client_id----令牌"></textarea>
-      <button class="btn" onclick="batchImport()">开始导入</button>
-      <div class="msg" id="batchMsg"></div>
+      <h3><span class="icon-lg">⚡</span> 批量导入</h3>
+      <textarea id="batchText" placeholder="每行一条：&#10;邮箱----密码----client_id----令牌"></textarea>
+      <button class="btn" id="batchBtn" onclick="doBatchImport()"><span>📥</span> 开始导入</button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-text"><span id="progressLabel">等待中…</span><span><span class="prog-ok" id="progOk">0</span> / <span class="prog-err" id="progErr">0</span></span></div>
+      </div>
+      <div class="msg" id="batchMsg" style="font-size:13px;margin-top:10px;min-height:18px;color:var(--c-text-muted);"></div>
     </div>
   </div>
 
-  <div class="card" style="margin-bottom: 20px;">
-    <h3>👥 账户列表</h3>
-    <table>
-      <thead><tr><th>邮箱</th><th>状态</th><th>协议</th><th>最后刷新</th><th>标签</th><th>操作</th></tr></thead>
-      <tbody id="accountBody"><tr><td colspan="6" style="text-align:center;color:#999;">加载中…</td></tr></tbody>
-    </table>
+  <div class="card" style="margin-bottom:20px;">
+    <h3><span class="icon-lg">👥</span> 账户列表 <span id="accountCount" style="font-weight:400;font-size:12px;color:var(--c-text-muted);"></span></h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>邮箱</th><th>状态</th><th>协议</th><th>最后刷新</th><th>标签</th><th>操作</th></tr></thead>
+        <tbody id="accountBody"><tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div><div style="color:var(--c-text-muted);font-size:13px;margin-top:10px;">加载中…</div></td></tr></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="card">
-    <h3>📬 邮件查看</h3>
+    <h3><span class="icon-lg">📬</span> 邮件查看</h3>
     <div class="toolbar">
       <select id="mailEmail"></select>
-      <select id="mailFolder">
-        <option value="inbox">收件箱</option>
-        <option value="junk">垃圾邮件</option>
-        <option value="all">全部</option>
-      </select>
+      <select id="mailFolder"><option value="inbox">收件箱</option><option value="junk">垃圾邮件</option><option value="all">全部</option></select>
       <input id="mailPage" type="number" value="1" min="1" style="width:70px;" title="页码">
-      <button class="btn ghost" onclick="loadEmails()">查看</button>
-      <button class="btn ghost" onclick="exportCsv()">导出 CSV</button>
-      <span class="msg" id="mailMsg"></span>
+      <button class="btn btn-sm" onclick="loadEmails()">📄 查看</button>
+      <button class="btn btn-sm ghost" onclick="exportCsv()">📥 CSV</button>
+      <span class="msg" id="mailMsg" style="font-size:13px;color:var(--c-text-muted);"></span>
     </div>
-    <div id="mailList"><div style="color:#999;font-size:13px;">先选择账户查看邮件</div></div>
+    <div id="mailList" style="min-height:60px;"><div style="color:var(--c-text-muted);font-size:13px;padding:20px;text-align:center;">选择账户查看邮件</div></div>
   </div>
 </div>
 
-<!-- 邮件详情弹窗 -->
 <div class="modal" id="detailModal">
   <div class="modal-box">
     <span class="close" onclick="closeModal()">&times;</span>
     <h3 id="detailTitle">邮件详情</h3>
-    <div id="detailMeta" style="font-size:12px;color:#888;margin-bottom:8px;"></div>
-    <div class="email-body" id="detailBody">加载中…</div>
+    <div class="modal-meta"><div id="detailFrom"></div><div id="detailTo"></div><div id="detailDate"></div></div>
+    <div class="email-body" id="detailBody"><div class="spinner" style="margin:0 auto;"></div></div>
   </div>
 </div>
 
@@ -131,154 +246,165 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let ACCOUNTS = [];
 
-async function api(path, opts = {}) {
-  const res = await fetch(path, {
-    headers: {'Content-Type': 'application/json'},
-    ...opts,
+/* Toast */
+function toast(msg, type = 'info', duration = 3500) {
+  const container = $('toastContainer');
+  const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+  const el = document.createElement('div');
+  el.className = 'toast' + (type === 'success' ? ' toast-success' : type === 'error' ? ' toast-error' : type === 'warning' ? ' toast-warning' : '');
+  el.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-msg">' + esc(msg) + '</span><span class="toast-close" onclick="this.parentElement.classList.add(\'removing\');setTimeout(()=>this.parentElement.remove(),250)">&times;</span>';
+  container.appendChild(el);
+  setTimeout(() => { if (el.parentElement) { el.classList.add('removing'); setTimeout(() => el.remove(), 250); } }, duration);
+}
+
+/* Loading button helper */
+function showLoading(btn) { if (btn) { btn.disabled = true; btn._orig = btn.innerHTML; btn.innerHTML = '<span class="spinner spinner-sm spinner-light"></span>'; } }
+function hideLoading(btn) { if (btn) { btn.disabled = false; if (btn._orig) btn.innerHTML = btn._orig; } }
+
+/* Confirm dialog */
+function confirmDialog(msg) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = '<div class="confirm-box"><h4>确认操作</h4><p>' + esc(msg) + '</p><div class="confirm-actions"><button class="btn ghost" id="confirmNo">取消</button><button class="btn danger" id="confirmYes">确定</button></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#confirmNo').onclick = () => { overlay.remove(); resolve(false); };
+    overlay.querySelector('#confirmYes').onclick = () => { overlay.remove(); resolve(true); };
+    overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
   });
+}
+
+/* API */
+async function api(path, opts = {}) {
+  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
   if (res.status === 401) { window.location.href = '/login'; throw new Error('未登录'); }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
   return data;
 }
 
+/* Load All */
 async function loadAll() {
   try {
-    const [list, health] = await Promise.all([
-      api('/api/accounts'),
-      api('/api/accounts/_health'),
-    ]);
+    const [list, health] = await Promise.all([ api('/api/accounts'), api('/api/accounts/_health') ]);
     ACCOUNTS = list.accounts || [];
     renderAccounts(ACCOUNTS);
     renderHealth(health);
     renderEmailSelect(ACCOUNTS);
-  } catch (e) { alert(e.message); }
+  } catch (e) { toast('加载失败: ' + e.message, 'error'); }
+}
+
+async function doRefresh() {
+  const btn = $('refreshBtn'); btn.classList.add('loading');
+  await loadAll();
+  btn.classList.remove('loading');
 }
 
 function renderHealth(h) {
-  const stats = $('healthStats');
-  stats.innerHTML = [
-    ['总数', h.total], ['正常', h.active], ['已失效', h.expired], ['需重授权', h.needs_reauth],
-  ].map(([lbl, num]) => `<div class="stat"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`).join('');
+  $('healthStats').innerHTML = [
+    ['总数', h.total, ''], ['正常', h.active, 'active'], ['已失效', h.expired, 'expired'], ['需重授权', h.needs_reauth, 'needs_reauth'],
+  ].map(([lbl, num, cls]) => '<div class="stat"><div class="num ' + cls + '">' + num + '</div><div class="lbl">' + lbl + '</div></div>').join('');
 }
 
 function renderAccounts(accounts) {
   const body = $('accountBody');
-  if (!accounts.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">暂无账户</td></tr>'; return; }
-  body.innerHTML = accounts.map(a => `
-    <tr>
-      <td>${esc(a.email)}</td>
-      <td><span class="badge ${esc(a.status)}">${esc(a.status)}</span></td>
-      <td>${esc(a.email_protocol || 'auto')}</td>
-      <td>${a.last_refreshed_at ? esc(new Date(a.last_refreshed_at).toLocaleString()) : '-'}</td>
-      <td>${esc((a.tags || []).join(', ') || '-')}</td>
-      <td>
-        <button class="btn ghost" onclick="refreshOne('${esc(a.email)}')">刷新 Token</button>
-        <button class="btn ghost" onclick="markStatus('${esc(a.email)}','expired')">标记失效</button>
-        <button class="btn danger" onclick="delAccount('${esc(a.email)}')">删除</button>
-      </td>
-    </tr>`).join('');
+  $('accountCount').textContent = accounts.length ? '— 共 ' + accounts.length + ' 个账户' : '';
+  if (!accounts.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--c-text-muted);font-size:13px;">暂无账户</td></tr>'; return; }
+  body.innerHTML = accounts.map(a => '<tr data-email="' + esc(a.email) + '"><td><strong>' + esc(a.email) + '</strong></td><td><span class="badge ' + esc(a.status) + '"><span class="dot"></span>' + esc(a.status) + '</span></td><td style="color:var(--c-text-muted);font-size:12px;">' + esc(a.email_protocol || 'auto') + '</td><td style="color:var(--c-text-muted);font-size:12px;">' + (a.last_refreshed_at ? esc(new Date(a.last_refreshed_at).toLocaleString()) : '-') + '</td><td style="color:var(--c-text-muted);font-size:12px;">' + esc((a.tags || []).join(', ') || '-') + '</td><td><div class="action-btns"><button class="btn btn-sm" onclick="doRefreshOne(\'' + esc(a.email) + '\')">🔄 刷新</button><button class="btn btn-sm ghost" onclick="doMarkStatus(\'' + esc(a.email) + '\',\'expired\')">⛔ 失效</button><button class="btn btn-sm danger" onclick="doDeleteAccount(\'' + esc(a.email) + '\')">🗑 删除</button></div></td></tr>').join('');
 }
 
 function renderEmailSelect(accounts) {
-  const sel = $('mailEmail');
-  const prev = sel.value;
-  sel.innerHTML = accounts.map(a => `<option value="${esc(a.email)}">${esc(a.email)}</option>`).join('');
+  const sel = $('mailEmail'); const prev = sel.value;
+  sel.innerHTML = accounts.map(a => '<option value="' + esc(a.email) + '">' + esc(a.email) + '</option>').join('');
   if (prev && accounts.some(a => a.email === prev)) sel.value = prev;
 }
 
-async function batchImport() {
-  const msg = $('batchMsg');
-  msg.className = 'msg'; msg.textContent = '导入中…';
+/* Batch Import */
+async function doBatchImport() {
+  const btn = $('batchBtn'); const msg = $('batchMsg'); const pw = $('progressWrap');
+  const pf = $('progressFill'); const pl = $('progressLabel'); const po = $('progOk'); const pe = $('progErr');
+  msg.textContent = ''; msg.style.color = 'var(--c-text-muted)';
+  pw.classList.add('active'); pf.style.width = '0%'; pl.textContent = '正在导入…'; po.textContent = '0'; pe.textContent = '0';
+  showLoading(btn);
   try {
-    const r = await api('/api/accounts/batch', {
-      method: 'POST',
-      body: JSON.stringify({ text: $('batchText').value }),
-    });
-    msg.className = 'msg ok';
-    msg.textContent = `成功 ${r.success}，失败 ${r.failed}${r.errors.length ? '：\n' + r.errors.slice(0, 5).join('\n') : ''}`;
+    const r = await api('/api/accounts/batch', { method: 'POST', body: JSON.stringify({ text: $('batchText').value }) });
+    po.textContent = r.success; pe.textContent = r.failed;
+    pf.style.width = '100%';
+    if (r.failed === 0) {
+      pl.textContent = '✅ 导入完成'; msg.textContent = '成功导入 ' + r.success + ' 个账户'; msg.style.color = 'var(--c-success)';
+      toast('成功导入 ' + r.success + ' 个账户', 'success');
+    } else {
+      pl.textContent = '⚠️ 导入完成（有失败）'; msg.innerHTML = '成功 ' + r.success + '，失败 ' + r.failed + (r.errors.length ? '：<br>' + r.errors.slice(0, 5).map(e => esc(e)).join('<br>') : ''); msg.style.color = 'var(--c-warning)';
+      toast('导入完成：成功 ' + r.success + '，失败 ' + r.failed, r.failed > r.success ? 'error' : 'warning');
+    }
     loadAll();
-  } catch (e) { msg.className = 'msg err'; msg.textContent = e.message; }
+  } catch (e) { pf.style.width = '0%'; pl.textContent = '❌ 导入失败'; msg.textContent = e.message; msg.style.color = 'var(--c-error)'; toast('导入失败: ' + e.message, 'error'); }
+  hideLoading(btn);
 }
 
-async function refreshOne(email) {
-  try {
-    await api(`/api/tokens/${encodeURIComponent(email)}/refresh`, { method: 'POST' });
-    alert('刷新成功'); loadAll();
-  } catch (e) { alert('刷新失败: ' + e.message); }
+/* Token Refresh */
+async function doRefreshOne(email) {
+  const btn = event.target; showLoading(btn);
+  try { await api('/api/tokens/' + encodeURIComponent(email) + '/refresh', { method: 'POST' }); toast('刷新成功', 'success'); loadAll(); }
+  catch (e) { toast('刷新失败: ' + e.message, 'error'); }
+  hideLoading(btn);
+}
+async function doRefreshAll() {
+  if (!await confirmDialog('确定刷新所有账户的 Token？')) return;
+  const btn = $('refreshAllBtn'); btn.classList.add('loading');
+  try { const r = await api('/api/tokens/refresh-all', { method: 'POST' }); toast(r.message || '全量刷新完成', 'success'); loadAll(); }
+  catch (e) { toast('全量刷新失败: ' + e.message, 'error'); }
+  btn.classList.remove('loading');
 }
 
-async function refreshAll() {
-  try {
-    const r = await api('/api/tokens/refresh-all', { method: 'POST' });
-    alert(r.message); loadAll();
-  } catch (e) { alert(e.message); }
+/* Account Management */
+async function doMarkStatus(email, status) {
+  try { await api('/api/accounts/' + encodeURIComponent(email) + '/status', { method: 'PUT', body: JSON.stringify({ status }) }); toast('已标记为 ' + status, 'success'); loadAll(); }
+  catch (e) { toast('操作失败: ' + e.message, 'error'); }
+}
+async function doDeleteAccount(email) {
+  if (!await confirmDialog('确定删除 ' + email + '？此操作不可恢复。')) return;
+  const row = document.querySelector('tr[data-email="' + esc(email) + '"]'); if (row) row.classList.add('row-removing');
+  try { await api('/api/accounts/' + encodeURIComponent(email), { method: 'DELETE' }); toast('账户已删除', 'success'); loadAll(); }
+  catch (e) { toast('删除失败: ' + e.message, 'error'); loadAll(); }
 }
 
-async function markStatus(email, status) {
-  try {
-    await api(`/api/accounts/${encodeURIComponent(email)}/status`, {
-      method: 'PUT', body: JSON.stringify({ status }),
-    });
-    loadAll();
-  } catch (e) { alert(e.message); }
-}
-
-async function delAccount(email) {
-  if (!confirm(`确定删除 ${email}？`)) return;
-  try {
-    await api(`/api/accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
-    loadAll();
-  } catch (e) { alert(e.message); }
-}
-
+/* Email */
 async function loadEmails() {
-  const email = $('mailEmail').value;
-  const folder = $('mailFolder').value;
-  const page = $('mailPage').value || 1;
-  const msg = $('mailMsg');
-  msg.textContent = '加载中…';
+  const email = $('mailEmail').value; const folder = $('mailFolder').value; const page = $('mailPage').value || 1; const msg = $('mailMsg');
+  if (!email) { toast('请先选择账户', 'warning'); return; }
+  msg.textContent = '加载中…'; $('mailList').innerHTML = '<div style="padding:20px;text-align:center;"><div class="spinner" style="margin:0 auto;"></div><div style="color:var(--c-text-muted);font-size:13px;margin-top:8px;">加载中…</div></div>';
   try {
-    const data = await api(`/api/emails/${encodeURIComponent(email)}?folder=${folder}&page=${page}&page_size=20`);
-    msg.className = 'msg ok';
-    msg.textContent = `共 ${data.total_emails} 封`;
+    const data = await api('/api/emails/' + encodeURIComponent(email) + '?folder=' + folder + '&page=' + page + '&page_size=20');
+    msg.textContent = '共 ' + data.total_emails + ' 封'; msg.style.color = 'var(--c-text-muted)';
     const list = $('mailList');
-    if (!data.emails.length) { list.innerHTML = '<div style="color:#999;font-size:13px;">无邮件</div>'; return; }
-    list.innerHTML = data.emails.map(m => `
-      <div class="email-item" onclick="showDetail('${esc(email)}','${esc(m.message_id)}')">
-        <div class="subj">${esc(m.subject)}</div>
-        <div class="meta">${esc(m.from_email)} · ${esc(m.date)}</div>
-      </div>`).join('');
-  } catch (e) { msg.className = 'msg err'; msg.textContent = e.message; }
+    if (!data.emails.length) { list.innerHTML = '<div style="color:var(--c-text-muted);font-size:13px;padding:20px;text-align:center;">无邮件</div>'; return; }
+    list.innerHTML = '<div class="email-list">' + data.emails.map(m => '<div class="email-item" onclick="showDetail(\'' + esc(email) + '\',\'' + esc(m.message_id) + '\')"><div class="row-top"><span class="sender-initial">' + esc(m.sender_initial || '?') + '</span><div style="flex:1;min-width:0;"><div class="subj">' + esc(m.subject) + '</div><div class="meta">' + esc(m.from_email) + ' · ' + esc(m.date) + '</div></div></div></div>').join('') + '</div>';
+  } catch (e) { msg.textContent = e.message; msg.style.color = 'var(--c-error)'; $('mailList').innerHTML = '<div style="color:var(--c-error);font-size:13px;padding:20px;text-align:center;">加载失败: ' + esc(e.message) + '</div>'; }
 }
 
 async function showDetail(email, messageId) {
-  $('detailModal').classList.add('open');
-  $('detailTitle').textContent = '邮件详情';
-  $('detailBody').textContent = '加载中…';
+  const modal = $('detailModal'); modal.classList.add('open');
+  $('detailTitle').textContent = '邮件详情'; $('detailBody').innerHTML = '<div class="spinner" style="margin:0 auto;"></div>';
+  $('detailFrom').textContent = ''; $('detailTo').textContent = ''; $('detailDate').textContent = '';
   try {
-    const d = await api(`/api/emails/${encodeURIComponent(email)}/${encodeURIComponent(messageId)}`);
+    const d = await api('/api/emails/' + encodeURIComponent(email) + '/' + encodeURIComponent(messageId));
     $('detailTitle').textContent = d.subject || '(无主题)';
-    $('detailMeta').innerHTML = `<div>发件人: ${esc(d.from_email)}</div><div>收件人: ${esc(d.to_email)}</div><div>日期: ${esc(d.date)}</div>`;
+    $('detailFrom').textContent = '📧 发件人: ' + (d.from_email || '');
+    $('detailTo').textContent = '📨 收件人: ' + (d.to_email || '');
+    $('detailDate').textContent = '📅 日期: ' + (d.date || '');
     $('detailBody').textContent = d.body_plain || d.body_html || '(无正文)';
-  } catch (e) {
-    $('detailBody').textContent = '加载失败: ' + e.message;
-  }
+  } catch (e) { $('detailBody').textContent = '加载失败: ' + e.message; }
 }
-
 function closeModal() { $('detailModal').classList.remove('open'); }
 $('detailModal').addEventListener('click', e => { if (e.target === $('detailModal')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 function exportCsv() {
-  const email = $('mailEmail').value;
-  const folder = $('mailFolder').value;
-  window.location.href = `/api/emails/${encodeURIComponent(email)}/export.csv?folder=${folder}&page_size=500`;
+  const email = $('mailEmail').value; if (!email) { toast('请先选择账户', 'warning'); return; }
+  window.location.href = '/api/emails/' + encodeURIComponent(email) + '/export.csv?folder=' + $('mailFolder').value + '&page_size=500';
 }
-
-async function logout() {
-  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
-  window.location.href = '/login';
-}
+async function doLogout() { try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {} window.location.href = '/login'; }
 
 loadAll();
 </script>

@@ -43,15 +43,26 @@ class RefreshScheduler:
         return self._last_run
 
     async def _run_loop(self) -> None:
+        retry_delay = 60  # 初始重试间隔 60 秒
+        max_retry = 3600  # 最多到 1 小时
         try:
             while not self._stop.is_set():  # type: ignore[union-attr]
-                await self._run_once()
+                # 先等一个间隔再跑，避免启动时立即触发
                 interval = settings.REFRESH_INTERVAL_HOURS * 3600
-                # 用 wait 支持信号唤醒，而不是 sleep
                 try:
                     await asyncio.wait_for(asyncio.shield(asyncio.sleep(interval)), timeout=interval)
                 except asyncio.CancelledError:
                     break
+
+                try:
+                    await self._run_once()
+                    retry_delay = 60  # 成功后重置
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    logger.exception("RefreshScheduler: 刷新失败，%s 秒后重试", retry_delay)
+                    await asyncio.sleep(retry_delay)
+                    retry_delay = min(retry_delay * 2, max_retry)
         except asyncio.CancelledError:
             raise
         except Exception:

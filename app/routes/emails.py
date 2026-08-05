@@ -86,3 +86,13 @@ async def clear_cache(
     """清空指定账户的邮件缓存。"""
     cleared = email_service.clear_cache(email_id)
     return {"message": "缓存已清空", "cleared": cleared}
+
+
+@router.get("/{email_id}/{message_id}", response_model=EmailDetailsResponse)
+async def get_email_detail(
+    email_id: str,
+    message_id: str,
+    repo: AccountRepository = Depends(_get_repo),
+) -> EmailDetailsResponse:
+    """获取单封邮件详情。"""
+    return await email_service.get_email_details(repo, email_id, message_id)

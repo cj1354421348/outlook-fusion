@@ -18,6 +18,13 @@ SessionFactory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commi
 
 
 async def get_session() -> AsyncSession:
-    """FastAPI 依赖：每请求一个 session。"""
-    async with SessionFactory() as session:
+    """FastAPI 依赖：每请求一个 session，请求成功自动 commit，异常自动 rollback。"""
+    session = SessionFactory()
+    try:
         yield session
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
