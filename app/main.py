@@ -17,6 +17,7 @@ from app.routes.emails import router as emails_router
 from app.routes.tokens import router as tokens_router
 from app.routes.web import router as web_router
 from app.scheduler import scheduler
+from app.scheduler.keepalive import keepalive
 
 
 def _assert_single_worker() -> None:
@@ -33,8 +34,10 @@ def _assert_single_worker() -> None:
 async def lifespan(app: FastAPI):
     _assert_single_worker()
     scheduler.start()
+    keepalive.start()
     logger.info("Outlook Fusion started (scheduler enabled, interval=%sh)", settings.REFRESH_INTERVAL_HOURS)
     yield
+    await keepalive.stop()
     await scheduler.stop()
     logger.info("Outlook Fusion shutdown complete")
 
