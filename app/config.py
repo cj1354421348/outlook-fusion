@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     TOKEN_HEALTH_ENABLED: bool = True
 
     # --- 平台保活（Render 等免费实例防休眠）---
+    RENDER_EXTERNAL_URL: str = ""  # Render 自动注入的公网地址（非 Render 平台留空）
     KEEPALIVE_URL: str = ""  # 手动指定公网 URL（留空则用 RENDER_EXTERNAL_URL）
     KEEPALIVE_MIN_INTERVAL_MINUTES: int = 1  # 随机间隔下限（分钟）
     KEEPALIVE_INTERVAL_MINUTES: int = 10  # 随机间隔上限（分钟），上限须 < 平台休眠阈值（Render = 15min）
