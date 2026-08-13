@@ -43,30 +43,28 @@ class RefreshScheduler:
         return self._last_run
 
     async def _run_loop(self) -> None:
-        retry_delay = 60  # 初始重试间隔 60 秒
-        max_retry = 3600  # 最多到 1 小时
+        interval = settings.REFRESH_INTERVAL_HOURS * 3600
         try:
-            while not self._stop.is_set():  # type: ignore[union-attr]
-                # 先等一个间隔再跑，避免启动时立即触发
-                interval = settings.REFRESH_INTERVAL_HOURS * 3600
-                try:
-                    await asyncio.wait_for(asyncio.shield(asyncio.sleep(interval)), timeout=interval)
-                except asyncio.CancelledError:
-                    break
-
-                try:
-                    await self._run_once()
-                    retry_delay = 60  # 成功后重置
-                except asyncio.CancelledError:
-                    raise
-                except Exception:
-                    logger.exception("RefreshScheduler: 刷新失败，%s 秒后重试", retry_delay)
-                    await asyncio.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 2, max_retry)
+            # 启动时立即执行第一轮，不等满一个周期偏（避免"重启后永远倒计时"的问题）
+            await self._run_once()
         except asyncio.CancelledError:
             raise
         except Exception:
-            logger.exception("RefreshScheduler crashed")
+            logger.exception("RefreshScheduler: 首轮刷新失败，进入周期循环")
+
+        while not self._stop.is_set():  # type: ignore[union-attr]
+            # 直接 sleep 等待周期；stop 时由 task.cancel() / _stop 结束休眠
+            try:
+                await asyncio.sleep(interval)
+            except asyncio.CancelledError:
+                break
+
+            try:
+                await self._run_once()
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.exception("RefreshScheduler crashed in cycle")
 
     async def trigger_immediate(self) -> None:
         """手动触发一次刷新（不打断计时器）。"""
@@ -91,6 +89,13 @@ class RefreshScheduler:
                     await asyncio.sleep(1)  # 限流
                 except Exception as e:
                     logger.warning("Scheduler refresh failed for %s: %s", account.email, e)
+                    # refresh_token_for_account 内部已 record_token_failure；
+                    # 若失败发生在协议探测阶段（未走 record_token_failure），这里补记，避免账户永远 active
+                    if getattr(account, "token_failures", None) is None and account.status != "expired":
+                        await repo.record_token_failure(
+                            account.email, status_code=None,
+                            error_message=str(e)[:200],
+                        )
                     repo._session.add(account)  # refresh_token_for_account 可能已改状态
                     failed += 1
 
