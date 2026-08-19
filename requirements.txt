@@ -11,3 +11,4 @@ cryptography==44.0.0
 httpx==0.28.1
 aioimaplib==2.0.1
 python-multipart==0.0.19
+beautifulsoup4==4.12.3
