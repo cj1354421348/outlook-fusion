@@ -5,492 +5,1650 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Outlook Fusion - 控制台</title>
 <style>
-/* ========== Design Tokens ========== */
+/* ========== Design System Tokens ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --c-primary: #2563eb; --c-primary-dark: #1d4ed8; --c-primary-light: #dbeafe;
-  --c-success: #10b981; --c-error: #ef4444; --c-warning: #f59e0b;
-  --c-bg: #f0f4f8; --c-card: #fff; --c-text: #1e293b; --c-text-muted: #64748b;
-  --c-border: #e2e8f0; --c-hover: #f8fafc; --c-header-bg: #0f172a;
-  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 12px;
-  --shadow-card: 0 1px 3px rgba(0,0,0,.08); --shadow-hover: 0 4px 12px rgba(0,0,0,.1);
-  --shadow-modal: 0 20px 60px rgba(0,0,0,.2);
-  --dur-fast: 150ms; --dur-normal: 250ms; --dur-slow: 400ms;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --font: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  --c-primary: #2563eb;
+  --c-primary-dark: #1d4ed8;
+  --c-primary-light: #eff6ff;
+  --c-primary-border: #bfdbfe;
+  --c-success: #10b981;
+  --c-success-bg: #ecfdf5;
+  --c-error: #ef4444;
+  --c-error-bg: #fef2f2;
+  --c-warning: #f59e0b;
+  --c-warning-bg: #fffbeb;
+  --c-bg: #f8fafc;
+  --c-card: #ffffff;
+  --c-text: #0f172a;
+  --c-text-muted: #64748b;
+  --c-text-subtle: #94a3b8;
+  --c-border: #e2e8f0;
+  --c-border-light: #f1f5f9;
+  --c-hover: #f8fafc;
+  --c-active: #f1f5f9;
+  --c-header-bg: #0f172a;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-hover: 0 6px 16px rgba(0,0,0,.08);
+  --shadow-modal: 0 20px 50px rgba(15,23,42,.25);
+  --dur-fast: 150ms;
+  --dur-normal: 250ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
-body { font-family: var(--font); background: var(--c-bg); color: var(--c-text); min-height: 100vh; }
+
+body {
+  font-family: var(--font);
+  background: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
 
 /* ========== Animations ========== */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes scaleIn { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes slideOutRight { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-@keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes progressFill { from { width: 0%; } }
 
-/* ========== Utility ========== */
-.spinner { width: 20px; height: 20px; border: 2.5px solid var(--c-border); border-top-color: var(--c-primary); border-radius: 50%; animation: spin .6s linear infinite; display: inline-block; vertical-align: middle; }
+/* ========== Utility Components ========== */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--c-border);
+  border-top-color: var(--c-primary);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
 .spinner-sm { width: 14px; height: 14px; border-width: 2px; }
 .spinner-light { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
-.skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 4px; }
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-xs);
+  display: inline-block;
+}
 
-/* ========== Toast ========== */
-#toastContainer { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast { pointer-events: auto; padding: 12px 16px; border-radius: var(--radius-md); background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.15); display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 280px; max-width: 420px; animation: slideInRight .3s var(--ease-out) both; border-left: 3px solid var(--c-primary); }
-.toast.removing { animation: slideOutRight .25s ease-in both; }
-.toast.toast-success { border-left-color: var(--c-success); }
-.toast.toast-error { border-left-color: var(--c-error); }
-.toast.toast-warning { border-left-color: var(--c-warning); }
-.toast-icon { font-size: 18px; flex-shrink: 0; }
-.toast-msg { flex: 1; color: var(--c-text); line-height: 1.4; }
-.toast-close { cursor: pointer; color: var(--c-text-muted); font-size: 16px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+/* ========== Toast System ========== */
+#toastContainer {
+  position: fixed; top: 16px; right: 16px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast {
+  pointer-events: auto; padding: 10px 14px;
+  border-radius: var(--radius-md); background: #fff;
+  box-shadow: 0 8px 24px rgba(15,23,42,.12), 0 0 0 1px rgba(0,0,0,.05);
+  display: flex; align-items: center; gap: 10px; font-size: 13px;
+  min-width: 260px; max-width: 400px;
+  animation: slideInRight .25s var(--ease-out) both;
+  border-left: 3.5px solid var(--c-primary);
+}
+.toast.removing { animation: slideOutRight .2s ease-in both; }
+.toast-success { border-left-color: var(--c-success); }
+.toast-error { border-left-color: var(--c-error); }
+.toast-warning { border-left-color: var(--c-warning); }
+.toast-icon { font-size: 16px; flex-shrink: 0; }
+.toast-msg { flex: 1; color: var(--c-text); line-height: 1.4; word-break: break-word; }
+.toast-close { cursor: pointer; color: var(--c-text-subtle); font-size: 16px; line-height: 1; padding: 2px; }
 .toast-close:hover { color: var(--c-text); }
 
-/* ========== Layout ========== */
-.wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+/* ========== Header & Navigation ========== */
+header {
+  background: var(--c-header-bg);
+  color: #fff;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08);
+}
+.header-inner {
+  max-width: 1360px; margin: 0 auto; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.logo-wrap {
+  display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #fff; box-shadow: 0 2px 6px rgba(37,99,235,.4);
+}
+.logo-title { font-size: 16px; font-weight: 700; letter-spacing: -.01em; color: #fff; }
+.logo-badge {
+  font-size: 10px; font-weight: 600;
+  background: rgba(255,255,255,.12); color: rgba(255,255,255,.8);
+  padding: 2px 6px; border-radius: var(--radius-full);
+}
 
-/* ========== Header ========== */
-header { background: var(--c-header-bg); color: #fff; padding: 0 24px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); box-shadow: 0 1px 0 rgba(255,255,255,.06); }
-.header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
-header h1 { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-header h1 .badge { font-size: 10px; font-weight: 500; background: rgba(255,255,255,.12); padding: 2px 8px; border-radius: 10px; color: rgba(255,255,255,.7); }
-header .actions { display: flex; gap: 8px; }
-header .actions button { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.1); padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all var(--dur-fast); display: flex; align-items: center; gap: 6px; position: relative; }
-header .actions button:hover { background: rgba(255,255,255,.15); color: #fff; }
-header .actions button:active { transform: scale(.97); }
-header .actions button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-header .actions button.loading .refresh-icon { animation: spin .8s linear infinite; }
-header .actions button.loading .btn-label { visibility: hidden; }
-header .actions button.loading .btn-spinner { display: inline-block; }
-header .actions button .btn-spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; position: absolute; left: 50%; top: 50%; margin-left: -7px; margin-top: -7px; }
+/* Nav Tabs */
+.nav-tabs {
+  display: flex; gap: 4px;
+  background: rgba(255,255,255,.06);
+  padding: 3px; border-radius: var(--radius-md);
+}
+.nav-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,.7); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all var(--dur-fast); border: none; background: transparent;
+}
+.nav-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+.nav-tab.active {
+  background: var(--c-primary); color: #fff;
+  box-shadow: 0 2px 6px rgba(37,99,235,.4);
+}
+.nav-tab .tab-count {
+  font-size: 11px; background: rgba(255,255,255,.2);
+  padding: 1px 6px; border-radius: var(--radius-full);
+}
 
-/* ========== Grid / Cards ========== */
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-.card { background: var(--c-card); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-card); transition: box-shadow var(--dur-fast), transform var(--dur-fast); animation: fadeUp .4s var(--ease-out) both; }
-.card:hover { box-shadow: var(--shadow-hover); }
-.card h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--c-text); display: flex; align-items: center; gap: 8px; }
-.card h3 .icon-lg { font-size: 18px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.btn-hdr {
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.85);
+  border: 1px solid rgba(255,255,255,.1); padding: 6px 12px;
+  border-radius: var(--radius-sm); cursor: pointer; font-size: 12px;
+  font-weight: 500; display: inline-flex; align-items: center; gap: 6px;
+  transition: all var(--dur-fast); position: relative;
+}
+.btn-hdr:hover { background: rgba(255,255,255,.16); color: #fff; }
+.btn-hdr:active { transform: scale(.97); }
+.btn-hdr.loading .icon-rotate { animation: spin .7s linear infinite; }
 
-/* ========== Stats ========== */
-.stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
-.stat { flex: 1; min-width: 100px; text-align: center; padding: 16px 8px; border-radius: var(--radius-sm); background: var(--c-bg); transition: transform var(--dur-fast); }
-.stat:hover { transform: translateY(-2px); }
-.stat .num { font-size: 26px; font-weight: 700; color: var(--c-primary); animation: countUp .5s var(--ease-out) both; }
-.stat .lbl { font-size: 12px; color: var(--c-text-muted); margin-top: 4px; }
-.stat .num.active { color: var(--c-success); }
-.stat .num.expired { color: var(--c-error); }
-.stat .num.needs_reauth { color: var(--c-warning); }
+/* ========== Main Container & Views ========== */
+main {
+  flex: 1; max-width: 1360px; width: 100%; margin: 0 auto;
+  padding: 20px 20px 40px;
+}
+.view-panel { display: none; animation: fadeUp .25s var(--ease-out) both; }
+.view-panel.active { display: block; }
 
-/* ========== Import ========== */
-textarea { width: 100%; height: 100px; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; font-family: var(--font-mono); resize: vertical; outline: none; transition: border-color var(--dur-fast), box-shadow var(--dur-fast); background: var(--c-bg); color: var(--c-text); }
-textarea:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); background: var(--c-card); }
-textarea::placeholder { color: #94a3b8; }
-.progress-wrap { margin-top: 10px; display: none; }
-.progress-wrap.active { display: block; }
-.progress-bar { height: 6px; background: var(--c-border); border-radius: 3px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--c-primary), var(--c-primary-dark)); border-radius: 3px; transition: width .3s var(--ease-out); }
-.progress-text { font-size: 12px; color: var(--c-text-muted); margin-top: 6px; display: flex; justify-content: space-between; }
-.progress-text .prog-ok { color: var(--c-success); }
-.progress-text .prog-err { color: var(--c-error); }
+/* ========== Common UI: Card / Buttons / Forms ========== */
+.card {
+  background: var(--c-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--c-border-light);
+}
+.card-title {
+  font-size: 15px; font-weight: 600; color: var(--c-text);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-desc { font-size: 12px; color: var(--c-text-muted); margin-top: 2px; }
 
-/* ========== Buttons ========== */
-.btn { display: inline-flex; align-items: center; gap: 6px; background: var(--c-primary); color: #fff; border: none; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 500; transition: all var(--dur-fast); white-space: nowrap; }
-.btn:hover { background: var(--c-primary-dark); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(37,99,235,.3); }
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--c-primary); color: #fff;
+  border: 1px solid transparent; padding: 7px 14px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; font-weight: 500; transition: all var(--dur-fast);
+  white-space: nowrap; user-select: none;
+}
+.btn:hover { background: var(--c-primary-dark); box-shadow: 0 2px 8px rgba(37,99,235,.25); transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
-.btn.ghost { background: var(--c-bg); color: var(--c-text); }
-.btn.ghost:hover { background: var(--c-border); box-shadow: none; transform: none; }
-.btn.danger { background: var(--c-error); }
-.btn.danger:hover { background: #dc2626; box-shadow: 0 2px 8px rgba(239,68,68,.3); }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-secondary { background: #fff; color: var(--c-text); border-color: var(--c-border); }
+.btn-secondary:hover { background: var(--c-hover); border-color: #cbd5e1; box-shadow: var(--shadow-xs); }
+.btn-ghost { background: transparent; color: var(--c-text-muted); border-color: transparent; }
+.btn-ghost:hover { background: var(--c-hover); color: var(--c-text); }
+.btn-danger { background: var(--c-error); color: #fff; }
+.btn-danger:hover { background: #dc2626; box-shadow: 0 2px 8px rgba(239,68,68,.25); }
+.btn-warning { background: var(--c-warning); color: #fff; }
+.btn-warning:hover { background: #d97706; }
+.btn-sm { padding: 4px 10px; font-size: 12px; border-radius: var(--radius-sm); }
+.btn-xs { padding: 2px 6px; font-size: 11px; border-radius: var(--radius-xs); }
 
-/* ========== Table ========== */
-.table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--c-border); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead th { background: #f8fafc; color: var(--c-text-muted); font-weight: 600; text-align: left; padding: 10px 12px; white-space: nowrap; border-bottom: 1px solid var(--c-border); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
-tbody td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; transition: background var(--dur-fast); }
-tbody tr:hover td { background: var(--c-hover); }
-tbody tr:last-child td { border-bottom: none; }
-tbody tr.row-removing td { opacity: 0; transform: translateX(-20px); transition: all .25s ease; }
+/* Form Controls */
+.input, .select, textarea {
+  font-family: inherit; font-size: 13px;
+  padding: 7px 10px; border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm); background: #fff; color: var(--c-text);
+  outline: none; transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.input:focus, .select:focus, textarea:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.select { cursor: pointer; }
+textarea { font-family: var(--font-mono); font-size: 12px; resize: vertical; }
 
-/* ========== Badge ========== */
-.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+/* Status Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 500; line-height: 1.4;
+}
 .badge .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-.badge.active { background: #ecfdf5; color: #065f46; }
-.badge.active .dot { background: var(--c-success); }
-.badge.expired { background: #fef2f2; color: #991b1b; }
-.badge.expired .dot { background: var(--c-error); }
-.badge.needs_reauth { background: #fffbeb; color: #92400e; }
-.badge.needs_reauth .dot { background: var(--c-warning); }
+.badge-active { background: var(--c-success-bg); color: #065f46; }
+.badge-active .dot { background: var(--c-success); }
+.badge-expired { background: var(--c-error-bg); color: #991b1b; }
+.badge-expired .dot { background: var(--c-error); }
+.badge-needs_reauth { background: var(--c-warning-bg); color: #92400e; }
+.badge-needs_reauth .dot { background: var(--c-warning); }
+.badge-neutral { background: #f1f5f9; color: #475569; }
 
-/* ========== Actions ========== */
-.action-btns { display: flex; gap: 4px; flex-wrap: nowrap; }
-.action-btns .btn { font-size: 11px; padding: 4px 8px; }
+/* Code Pill for OTP Verification */
+.code-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+  padding: 2px 8px; border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all var(--dur-fast);
+}
+.code-pill:hover {
+  background: #2563eb; color: #fff; border-color: #2563eb;
+  transform: scale(1.03); box-shadow: 0 2px 6px rgba(37,99,235,.2);
+}
+.code-pill:active { transform: scale(.98); }
 
-/* ========== Confirm ========== */
-.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 200; display: flex; align-items: center; justify-content: center; animation: fadeIn .15s ease; }
-.confirm-box { background: #fff; border-radius: var(--radius-lg); padding: 24px; max-width: 360px; width: 90%; box-shadow: var(--shadow-modal); animation: scaleIn .2s var(--ease-out); }
-.confirm-box h4 { font-size: 15px; margin-bottom: 8px; }
-.confirm-box p { font-size: 13px; color: var(--c-text-muted); margin-bottom: 16px; }
-.confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+/* ========== Section 1: 账户管理视图 (Accounts View) ========== */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: #fff; border: 1px solid var(--c-border);
+  border-radius: var(--radius-md); padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: transform var(--dur-fast), box-shadow var(--dur-fast);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.stat-label { font-size: 12px; color: var(--c-text-muted); font-weight: 500; }
+.stat-value { font-size: 24px; font-weight: 700; color: var(--c-text); margin-top: 4px; }
+.stat-icon { font-size: 24px; opacity: .85; }
 
-/* ========== Modal ========== */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-.modal.open { display: flex; }
-.modal-box { background: #fff; border-radius: var(--radius-lg); width: 92%; max-width: 820px; max-height: 88vh; overflow: auto; padding: 24px; box-shadow: var(--shadow-modal); animation: scaleIn .25s var(--ease-out); position: relative; }
-.modal-box .close { position: absolute; top: 16px; right: 20px; cursor: pointer; color: var(--c-text-muted); font-size: 24px; line-height: 1; transition: color var(--dur-fast); }
-.modal-box .close:hover { color: var(--c-text); }
-.modal-box h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--c-text); padding-right: 30px; word-break: break-word; }
-.modal-meta { font-size: 12px; color: var(--c-text-muted); margin-bottom: 12px; background: var(--c-bg); padding: 8px 12px; border-radius: var(--radius-sm); }
-.modal-meta div { margin-bottom: 2px; }
-.modal-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
-.modal-tabs .tab-btn { padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: var(--radius-sm); border: 1px solid var(--c-border); background: var(--c-bg); color: var(--c-text-muted); cursor: pointer; transition: all var(--dur-fast); }
-.modal-tabs .tab-btn.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
-.modal-tabs .tab-btn:hover:not(.active) { background: var(--c-hover); color: var(--c-text); }
-.email-iframe-wrap { width: 100%; border: 1px solid var(--c-border); border-radius: var(--radius-sm); background: #fff; overflow: hidden; }
-.email-iframe-wrap iframe { width: 100%; height: 420px; border: none; display: block; }
-.email-body { font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; padding: 16px; background: var(--c-bg); border-radius: var(--radius-sm); max-height: 50vh; overflow-y: auto; }
+/* Quick Import Collapsible */
+.import-card {
+  background: #fff; border: 1px solid var(--c-border);
+  border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;
+  display: none;
+}
+.import-card.open { display: block; animation: fadeUp .2s var(--ease-out); }
 
-/* ========== Email Cards ========== */
-.email-list { display: flex; flex-direction: column; gap: 4px; }
-.email-item { padding: 12px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--dur-fast), transform var(--dur-fast); border: 1px solid transparent; }
-.email-item:hover { background: var(--c-hover); border-color: var(--c-border); }
-.email-item:active { transform: scale(.995); }
-.email-item .subj { font-weight: 600; font-size: 13px; color: var(--c-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.email-item .meta { font-size: 12px; color: var(--c-text-muted); margin-top: 3px; }
-.email-item .sender-initial { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--c-primary-light); color: var(--c-primary); font-size: 12px; font-weight: 600; flex-shrink: 0; }
-.email-item .row-top { display: flex; align-items: center; gap: 10px; }
+/* Accounts Table & Toolbar */
+.table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-box { position: relative; min-width: 240px; }
+.search-box .icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--c-text-subtle); font-size: 13px; }
+.search-box input { width: 100%; padding-left: 30px; }
 
-/* ========== Toolbar ========== */
-.toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-.toolbar select, .toolbar input { padding: 7px 10px; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); font-size: 13px; outline: none; background: var(--c-bg); color: var(--c-text); transition: border-color var(--dur-fast); }
-.toolbar select:focus, .toolbar input:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.toolbar select { cursor: pointer; }
-.toolbar .msg { font-size: 13px; color: var(--c-text-muted); margin-left: 4px; }
+/* Floating Batch Action Bar */
+.batch-bar {
+  display: none; align-items: center; justify-content: space-between;
+  background: #0f172a; color: #fff; padding: 10px 18px;
+  border-radius: var(--radius-md); margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(15,23,42,.2);
+  animation: fadeUp .2s var(--ease-out);
+}
+.batch-bar.active { display: flex; }
+.batch-info { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.batch-actions { display: flex; gap: 6px; }
 
-/* ========== Responsive ========== */
-@media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .stat { min-width: 80px; padding: 12px 6px; } .stat .num { font-size: 20px; } header { padding: 0 16px; } .header-inner { height: 48px; } header h1 { font-size: 15px; } .wrap { padding: 0 12px 24px; } .card { padding: 14px; } .modal-box { padding: 20px; width: 95%; } .action-btns { flex-direction: column; } }
+/* Table Style */
+.table-container {
+  overflow-x: auto; border: 1px solid var(--c-border);
+  border-radius: var(--radius-md); background: #fff;
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: #f8fafc; color: var(--c-text-muted);
+  font-weight: 600; text-align: left; padding: 10px 14px;
+  border-bottom: 1px solid var(--c-border); font-size: 12px;
+  white-space: nowrap;
+}
+tbody td {
+  padding: 10px 14px; border-bottom: 1px solid var(--c-border-light);
+  transition: background var(--dur-fast); vertical-align: middle;
+}
+tbody tr:hover td { background: #f8fafc; }
+tbody tr.selected td { background: #eff6ff; }
+tbody tr:last-child td { border-bottom: none; }
+.email-col { display: flex; align-items: center; gap: 8px; }
+.copy-btn {
+  opacity: 0; cursor: pointer; color: var(--c-text-subtle);
+  padding: 2px 4px; border-radius: var(--radius-xs);
+  transition: all var(--dur-fast); border: none; background: transparent;
+}
+tr:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { color: var(--c-primary); background: var(--c-primary-light); }
+
+/* ========== Section 2: 邮件工作台 (Email Workspace Split-Pane) ========== */
+.email-workspace {
+  display: grid; grid-template-columns: 380px 1fr;
+  height: calc(100vh - 120px); min-height: 600px;
+  background: #fff; border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.email-sidebar {
+  border-right: 1px solid var(--c-border);
+  display: flex; flex-direction: column;
+  background: #fafafa;
+}
+.email-header-pane {
+  padding: 14px 16px; border-bottom: 1px solid var(--c-border);
+  background: #fff; display: flex; flex-direction: column; gap: 10px;
+}
+.account-selector-row { display: flex; gap: 8px; align-items: center; }
+.folder-tabs {
+  display: flex; gap: 4px; background: var(--c-bg);
+  padding: 3px; border-radius: var(--radius-sm);
+}
+.folder-tab {
+  flex: 1; text-align: center; padding: 5px 8px;
+  font-size: 12px; font-weight: 500; color: var(--c-text-muted);
+  border: none; background: transparent; border-radius: var(--radius-xs);
+  cursor: pointer; transition: all var(--dur-fast);
+}
+.folder-tab:hover { color: var(--c-text); }
+.folder-tab.active {
+  background: #fff; color: var(--c-primary);
+  font-weight: 600; box-shadow: var(--shadow-xs);
+}
+
+.email-search-row { display: flex; gap: 6px; }
+.email-search-row input { flex: 1; font-size: 12px; padding: 6px 10px; }
+
+/* Email List */
+.email-list-scroll {
+  flex: 1; overflow-y: auto; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.email-card {
+  padding: 12px 14px; background: #fff;
+  border: 1px solid var(--c-border); border-radius: var(--radius-md);
+  cursor: pointer; transition: all var(--dur-fast);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.email-card:hover { border-color: #cbd5e1; box-shadow: var(--shadow-xs); transform: translateY(-1px); }
+.email-card.active {
+  border-color: var(--c-primary); background: #f0f7ff;
+  box-shadow: 0 0 0 1px var(--c-primary);
+}
+.email-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.email-sender { font-size: 13px; font-weight: 600; color: var(--c-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email-date { font-size: 11px; color: var(--c-text-subtle); flex-shrink: 0; }
+.email-subject { font-size: 13px; color: #334155; font-weight: 500; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+.email-badge-folder { font-size: 10px; color: var(--c-text-muted); background: var(--c-bg); padding: 1px 6px; border-radius: var(--radius-xs); }
+
+/* Email List Pagination */
+.email-pagination {
+  padding: 8px 12px; border-top: 1px solid var(--c-border);
+  background: #fff; display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--c-text-muted);
+}
+
+/* Email Detail Pane */
+.email-detail-pane {
+  display: flex; flex-direction: column;
+  background: #fff; overflow: hidden; position: relative;
+}
+.email-detail-empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; color: var(--c-text-subtle); gap: 12px; padding: 40px;
+}
+.email-detail-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--c-border);
+  background: #fff; display: flex; flex-direction: column; gap: 10px;
+}
+.detail-subject-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.detail-subject { font-size: 18px; font-weight: 700; color: var(--c-text); line-height: 1.3; }
+.detail-meta-grid {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 12px;
+  font-size: 12px; color: var(--c-text-muted); background: var(--c-bg);
+  padding: 10px 14px; border-radius: var(--radius-sm);
+}
+.detail-meta-label { font-weight: 600; color: var(--c-text); }
+
+/* Code Extraction Banner in Detail */
+.otp-highlight-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe; border-radius: var(--radius-md);
+  padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+  margin: 0 24px 14px; animation: scaleIn .2s var(--ease-out);
+}
+.otp-text-group { display: flex; align-items: center; gap: 12px; }
+.otp-big-code {
+  font-family: var(--font-mono); font-size: 20px; font-weight: 700;
+  color: #1d4ed8; letter-spacing: 2px;
+}
+
+/* Detail View Tabs & Content */
+.detail-body-container { flex: 1; display: flex; flex-direction: column; padding: 0 24px 20px; overflow: hidden; }
+.detail-view-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.detail-iframe-box {
+  flex: 1; border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: #fff; overflow: hidden;
+}
+.detail-iframe-box iframe { width: 100%; height: 100%; border: none; display: block; }
+.detail-plain-box {
+  flex: 1; border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: #f8fafc; padding: 16px; font-family: inherit; font-size: 13px;
+  line-height: 1.6; white-space: pre-wrap; word-break: break-word; overflow-y: auto;
+}
+
+/* ========== Section 3: 系统与安全视图 (Settings View) ========== */
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.api-key-box {
+  background: var(--c-bg); border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm); padding: 12px; margin-top: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 13px;
+}
+
+/* ========== Modal Dialogs ========== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.4);
+  backdrop-filter: blur(3px); z-index: 500;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+  animation: fadeIn .15s ease;
+}
+.modal-overlay.open { display: flex; }
+.modal-card {
+  background: #fff; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal); width: 100%; max-width: 520px;
+  overflow: hidden; animation: scaleIn .2s var(--ease-out);
+}
+.modal-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--c-border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-head h4 { font-size: 16px; font-weight: 600; }
+.modal-body { padding: 20px; max-height: 75vh; overflow-y: auto; }
+.modal-foot {
+  padding: 14px 20px; border-top: 1px solid var(--c-border);
+  background: #f8fafc; display: flex; justify-content: flex-end; gap: 8px;
+}
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--c-text-muted); margin-bottom: 6px; }
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .email-workspace { grid-template-columns: 1fr; height: auto; }
+  .email-sidebar { height: 420px; }
+  .email-detail-pane { min-height: 400px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .settings-grid { grid-template-columns: 1fr; }
+  .nav-tab span.tab-text { display: none; }
+}
 </style>
 </head>
 <body>
+
 <div id="toastContainer"></div>
 
+<!-- ========== HEADER ========== -->
 <header>
   <div class="header-inner">
-    <h1>📧 Outlook Fusion <span class="badge">v0.1</span></h1>
-    <div class="actions">
-      <button id="refreshBtn" onclick="doRefresh()"><span class="refresh-icon">🔄</span> <span class="btn-label">刷新</span><span class="btn-spinner"></span></button>
-      <button id="refreshAllBtn" onclick="doRefreshAll()"><span>⚡</span> <span class="btn-label">全量刷新</span><span class="btn-spinner"></span></button>
-      <button onclick="doLogout()"><span>🚪</span> 退出</button>
+    <div class="logo-wrap" onclick="switchView('accounts')">
+      <div class="logo-icon">📧</div>
+      <div class="logo-title">Outlook Fusion</div>
+      <span class="logo-badge">v0.1.0</span>
+    </div>
+
+    <!-- Central View Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabNavAccounts" onclick="switchView('accounts')">
+        <span>👥</span> <span class="tab-text">账户管理</span>
+        <span class="tab-count" id="navAccountCount">0</span>
+      </button>
+      <button class="nav-tab" id="tabNavEmails" onclick="switchView('emails')">
+        <span>📬</span> <span class="tab-text">邮件工作台</span>
+      </button>
+      <button class="nav-tab" id="tabNavSettings" onclick="switchView('settings')">
+        <span>⚙️</span> <span class="tab-text">系统与安全</span>
+      </button>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="btn-hdr" id="hdrRefreshBtn" onclick="doGlobalRefresh()" title="刷新当前数据 (R)">
+        <span class="icon-rotate">🔄</span> 刷新
+      </button>
+      <button class="btn-hdr" onclick="doLogout()" title="退出登录">
+        <span>🚪</span> 退出
+      </button>
     </div>
   </div>
 </header>
 
-<div class="wrap">
-  <div class="grid">
-    <div class="card">
-      <h3><span class="icon-lg">📊</span> Token 健康</h3>
-      <div class="stat-row" id="healthStats">
-        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">总数</div></div>
-        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">正常</div></div>
-        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">已失效</div></div>
-        <div class="stat"><div class="num skeleton" style="width:30px;margin:0 auto;">&nbsp;</div><div class="lbl">需重授权</div></div>
+<!-- ========== MAIN VIEWS ========== -->
+<main>
+
+  <!-- VIEW 1: ACCOUNTS MANAGEMENT -->
+  <div class="view-panel active" id="viewAccounts">
+    
+    <!-- Health Stats Overview -->
+    <div class="stats-grid">
+      <div class="stat-card" style="border-left: 3.5px solid var(--c-primary);">
+        <div>
+          <div class="stat-label">总账户数</div>
+          <div class="stat-value" id="statTotal">-</div>
+        </div>
+        <div class="stat-icon">📊</div>
+      </div>
+      <div class="stat-card" style="border-left: 3.5px solid var(--c-success);">
+        <div>
+          <div class="stat-label">正常可用 (Active)</div>
+          <div class="stat-value" style="color:var(--c-success);" id="statActive">-</div>
+        </div>
+        <div class="stat-icon">🟢</div>
+      </div>
+      <div class="stat-card" style="border-left: 3.5px solid var(--c-warning);">
+        <div>
+          <div class="stat-label">需重授权 (Needs Auth)</div>
+          <div class="stat-value" style="color:var(--c-warning);" id="statNeedsAuth">-</div>
+        </div>
+        <div class="stat-icon">🟡</div>
+      </div>
+      <div class="stat-card" style="border-left: 3.5px solid var(--c-error);">
+        <div>
+          <div class="stat-label">已失效 (Expired)</div>
+          <div class="stat-value" style="color:var(--c-error);" id="statExpired">-</div>
+        </div>
+        <div class="stat-icon">🔴</div>
       </div>
     </div>
-    <div class="card">
-      <h3><span class="icon-lg">⚡</span> 批量导入</h3>
-      <textarea id="batchText" placeholder="每行一条：&#10;邮箱----密码----client_id----令牌"></textarea>
-      <button class="btn" id="batchBtn" onclick="doBatchImport()"><span>📥</span> 开始导入</button>
-      <div class="progress-wrap" id="progressWrap">
-        <div class="progress-bar"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
-        <div class="progress-text"><span id="progressLabel">等待中…</span><span><span class="prog-ok" id="progOk">0</span> / <span class="prog-err" id="progErr">0</span></span></div>
+
+    <!-- Quick Import Expandable Box -->
+    <div class="import-card" id="importBox">
+      <div class="card-header" style="margin-bottom:12px;padding-bottom:8px;">
+        <div class="card-title"><span>📥</span> 批量导入账户</div>
+        <button class="btn-ghost btn-sm" onclick="toggleImportBox(false)">✕ 关闭</button>
       </div>
-      <div class="msg" id="batchMsg" style="font-size:13px;margin-top:10px;min-height:18px;color:var(--c-text-muted);"></div>
+      <p style="font-size:12px;color:var(--c-text-muted);margin-bottom:8px;">
+        格式（每行一条）：<code>邮箱----密码----client_id----refresh_token</code>
+      </p>
+      <textarea id="batchImportText" rows="5" style="width:100%;margin-bottom:10px;" placeholder="example@outlook.com----password----client_id----refresh_token"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div id="importStatusText" style="font-size:12px;color:var(--c-text-muted);"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="$('batchImportText').value=''">清空</button>
+          <button class="btn btn-sm" id="btnSubmitBatch" onclick="submitBatchImport()">开始导入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Table Card -->
+    <div class="card">
+      
+      <!-- Toolbar -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span class="icon">🔍</span>
+            <input class="input" id="accountSearchInput" placeholder="按邮箱 / 标签搜索..." oninput="onAccountFilterChange()">
+          </div>
+          <select class="select" id="accountStatusFilter" onchange="onAccountFilterChange()">
+            <option value="all">所有状态</option>
+            <option value="active">🟢 正常 (Active)</option>
+            <option value="needs_reauth">🟡 需重授权</option>
+            <option value="expired">🔴 已失效</option>
+          </select>
+          <select class="select" id="accountProtocolFilter" onchange="onAccountFilterChange()">
+            <option value="all">所有协议</option>
+            <option value="auto">Auto</option>
+            <option value="imap">IMAP</option>
+            <option value="graph">Graph</option>
+            <option value="pop3">POP3</option>
+          </select>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn btn-secondary btn-sm" onclick="toggleImportBox()">
+            <span>📥</span> 批量导入
+          </button>
+          <button class="btn btn-sm" onclick="openAddAccountModal()">
+            <span>➕</span> 添加单个账户
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btnRefreshAll" onclick="doRefreshAllTokens()" title="刷新所有未失效账户">
+            <span>⚡</span> 全量刷新 Token
+          </button>
+        </div>
+      </div>
+
+      <!-- Batch Actions Bar (Visible when rows selected) -->
+      <div class="batch-bar" id="batchActionBar">
+        <div class="batch-info">
+          <span>☑️ 已选中 <b id="batchSelectedCount">0</b> 个账户</span>
+        </div>
+        <div class="batch-actions">
+          <button class="btn btn-secondary btn-xs" onclick="copySelectedEmails()">📋 复制选中邮箱</button>
+          <button class="btn btn-secondary btn-xs" onclick="batchRefreshSelected()">🔄 批量刷新</button>
+          <button class="btn btn-warning btn-xs" onclick="batchMarkExpiredSelected()">⛔ 标记失效</button>
+          <button class="btn btn-danger btn-xs" onclick="batchDeleteSelected()">🗑️ 批量删除</button>
+          <button class="btn btn-ghost btn-xs" style="color:#fff;" onclick="clearAccountSelection()">取消</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="selectAllAccountsCheckbox" onchange="toggleSelectAllAccounts(this.checked)"></th>
+              <th>邮箱地址</th>
+              <th>状态</th>
+              <th>协议</th>
+              <th>最后刷新</th>
+              <th>标签 / 备注</th>
+              <th style="text-align:right;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted);"><div class="spinner"></div><div style="margin-top:8px;">加载账户中...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:20px;">
-    <h3><span class="icon-lg">👥</span> 账户列表 <span id="accountCount" style="font-weight:400;font-size:12px;color:var(--c-text-muted);"></span></h3>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>邮箱</th><th>状态</th><th>协议</th><th>最后刷新</th><th>标签</th><th>操作</th></tr></thead>
-        <tbody id="accountBody"><tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div><div style="color:var(--c-text-muted);font-size:13px;margin-top:10px;">加载中…</div></td></tr></tbody>
-      </table>
+  <!-- VIEW 2: EMAIL WORKSPACE (SPLIT PANE) -->
+  <div class="view-panel" id="viewEmails">
+    <div class="email-workspace">
+      
+      <!-- Left Sidebar: Email Selector & List -->
+      <div class="email-sidebar">
+        <div class="email-header-pane">
+          <div class="account-selector-row">
+            <span style="font-size:16px;">📧</span>
+            <select class="select" id="emailWorkspaceAccountSelect" style="flex:1;font-weight:600;" onchange="onEmailWorkspaceAccountChange()">
+              <option value="">选择账户...</option>
+            </select>
+          </div>
+
+          <div class="folder-tabs">
+            <button class="folder-tab active" id="folderTabInbox" onclick="switchEmailFolder('inbox')">📥 收件箱</button>
+            <button class="folder-tab" id="folderTabJunk" onclick="switchEmailFolder('junk')">🗑️ 垃圾箱</button>
+            <button class="folder-tab" id="folderTabAll" onclick="switchEmailFolder('all')">📦 全部</button>
+          </div>
+
+          <div class="email-search-row">
+            <input class="input" id="emailSearchInput" placeholder="搜索发件人 / 主题..." onkeydown="if(event.key==='Enter') doSearchEmails()">
+            <button class="btn btn-secondary btn-sm" onclick="doSearchEmails()">🔍</button>
+            <button class="btn btn-secondary btn-sm" onclick="refreshEmailsCurrent(true)" title="强制刷新邮件缓存">🔄</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportCsvCurrent()" title="导出 CSV">📥</button>
+          </div>
+        </div>
+
+        <!-- Scrollable Email List Items -->
+        <div class="email-list-scroll" id="emailListItems">
+          <div class="email-detail-empty"><span>📬 请先选择账户加载邮件</span></div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="email-pagination">
+          <button class="btn btn-ghost btn-xs" id="btnPrevPage" onclick="changeEmailPage(-1)" disabled>◀ 上一页</button>
+          <span id="emailPageIndicator">第 1 页</span>
+          <button class="btn btn-ghost btn-xs" id="btnNextPage" onclick="changeEmailPage(1)">下一页 ▶</button>
+        </div>
+      </div>
+
+      <!-- Right Pane: Email Detail & OTP Extract -->
+      <div class="email-detail-pane" id="emailDetailPane">
+        
+        <!-- Empty Placeholder -->
+        <div class="email-detail-empty" id="detailEmptyState">
+          <div style="font-size:48px;">📨</div>
+          <div style="font-weight:600;font-size:15px;">未选择邮件</div>
+          <div style="font-size:12px;">从左侧列表中点击邮件以快速预览正文与提取验证码</div>
+        </div>
+
+        <!-- Real Content Container -->
+        <div id="detailContentState" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden;">
+          
+          <div class="email-detail-header">
+            <div class="detail-subject-row">
+              <div class="detail-subject" id="detailSubjectText">邮件主题</div>
+              <button class="btn btn-ghost btn-xs" onclick="copyDetailPlain()" title="复制邮件纯文本">📋 复制正文</button>
+            </div>
+            <div class="detail-meta-grid">
+              <span class="detail-meta-label">发件人:</span> <span id="detailFromText"></span>
+              <span class="detail-meta-label">收件人:</span> <span id="detailToText"></span>
+              <span class="detail-meta-label">时间:</span> <span id="detailDateText"></span>
+            </div>
+          </div>
+
+          <!-- OTP Fast Action Banner (Shown if code is detected) -->
+          <div class="otp-highlight-banner" id="detailOtpBanner" style="display:none;">
+            <div class="otp-text-group">
+              <span style="font-size:20px;">🔑</span>
+              <div>
+                <div style="font-size:11px;color:#1e40af;font-weight:600;">智能检测到验证码</div>
+                <div class="otp-big-code" id="detailOtpCodeVal">------</div>
+              </div>
+            </div>
+            <button class="btn btn-sm" id="detailOtpCopyBtn" onclick="copyDetectedOtp()">一键复制验证码</button>
+          </div>
+
+          <div class="detail-body-container">
+            <div class="detail-view-tabs">
+              <button class="btn btn-sm btn-secondary" id="tabBtnDetailHtml" onclick="switchDetailBodyTab('html')">🎨 富文本视图</button>
+              <button class="btn btn-sm btn-ghost" id="tabBtnDetailPlain" onclick="switchDetailBodyTab('plain')">📄 纯文本视图</button>
+            </div>
+            <div class="detail-iframe-box" id="detailIframeBox">
+              <iframe id="detailIframe" sandbox="allow-popups allow-same-origin"></iframe>
+            </div>
+            <div class="detail-plain-box" id="detailPlainBox" style="display:none;"></div>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   </div>
 
-  <div class="card">
-    <h3><span class="icon-lg">📬</span> 邮件查看</h3>
-    <div class="toolbar">
-      <select id="mailEmail"></select>
-      <select id="mailFolder"><option value="inbox">收件箱</option><option value="junk">垃圾邮件</option><option value="all">全部</option></select>
-      <input id="mailPage" type="number" value="1" min="1" style="width:70px;" title="页码">
-      <button class="btn btn-sm" onclick="loadEmails()">📄 查看</button>
-      <button class="btn btn-sm ghost" onclick="exportCsv()">📥 CSV</button>
-      <span class="msg" id="mailMsg" style="font-size:13px;color:var(--c-text-muted);"></span>
+  <!-- VIEW 3: SETTINGS & SECURITY -->
+  <div class="view-panel" id="viewSettings">
+    <div class="settings-grid">
+      
+      <!-- API Key Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span>🔑</span> API Key 开放接口授权</div>
+            <div class="card-desc">通过 HTTP 头部 <code>Authorization: Bearer &lt;KEY&gt;</code> 访问系统 API</div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span>当前状态:</span>
+            <span class="badge" id="apiKeyStatusBadge">检查中...</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn btn-sm" onclick="rotateApiKeyAction()">⚡ 轮换 / 生成新 API Key</button>
+            <button class="btn btn-danger btn-sm" id="btnDeleteApiKey" onclick="deleteApiKeyAction()">🗑️ 删除 API Key</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Defence Status Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span>🛡️</span> 安全防御与 IP 锁定监控</div>
+            <div class="card-desc">防爆破登录自动封禁防护机制</div>
+          </div>
+        </div>
+        <div id="securityStatusBody" style="font-size:13px;color:var(--c-text-muted);">
+          加载安全状态中...
+        </div>
+      </div>
+
+      <!-- Scheduler Immediate Trigger Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span>⏱️</span> 后台调度任务控制</div>
+            <div class="card-desc">手动调度自动化 Refresh Token 轮换流水线</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--c-text-muted);margin-bottom:14px;">
+          触发后台任务立即对所有未失效账户执行一轮探测与 Refresh Token 刷新。
+        </p>
+        <button class="btn btn-secondary btn-sm" onclick="triggerSchedulerNow()">
+          <span>▶️</span> 立即触发调度器任务
+        </button>
+      </div>
+
     </div>
-    <div id="mailList" style="min-height:60px;"><div style="color:var(--c-text-muted);font-size:13px;padding:20px;text-align:center;">选择账户查看邮件</div></div>
+  </div>
+
+</main>
+
+<!-- ========== MODAL: ADD SINGLE ACCOUNT ========== -->
+<div class="modal-overlay" id="modalAddAccount">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4>➕ 添加单个 Outlook 账户</h4>
+      <button class="btn-ghost btn-sm" onclick="closeModal('modalAddAccount')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>邮箱地址 *</label>
+        <input class="input" id="addEmailInput" placeholder="example@outlook.com" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label>Client ID *</label>
+        <input class="input" id="addClientIdInput" placeholder="例如: 9e5f94bc-e8a4-4e73-b8be-63364c29d753" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label>Refresh Token (将加密存储) *</label>
+        <textarea id="addRefreshTokenInput" rows="3" placeholder="输入 OAuth refresh_token" style="width:100%;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>标签 (逗号分隔)</label>
+        <input class="input" id="addTagsInput" placeholder="prod, primary" style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label>备注 (可选)</label>
+        <input class="input" id="addNoteInput" placeholder="备注信息" style="width:100%;">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modalAddAccount')">取消</button>
+      <button class="btn" id="btnAddAccountSubmit" onclick="submitAddSingleAccount()">确认添加</button>
+    </div>
   </div>
 </div>
 
-<div class="modal" id="detailModal">
-  <div class="modal-box">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h3 id="detailTitle">邮件详情</h3>
-    <div class="modal-meta"><div id="detailFrom"></div><div id="detailTo"></div><div id="detailDate"></div></div>
-    <div class="modal-tabs" id="detailTabs">
-      <button class="tab-btn active" id="tabBtnHtml" onclick="switchDetailTab('html')">🎨 富文本视图</button>
-      <button class="tab-btn" id="tabBtnPlain" onclick="switchDetailTab('plain')">📄 纯文本 (提取验证码)</button>
+<!-- ========== MODAL: NEW API KEY SHOW ONCE ========== -->
+<div class="modal-overlay" id="modalApiKey">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4>🔑 新 API Key 已生成</h4>
+      <button class="btn-ghost btn-sm" onclick="closeModal('modalApiKey')">✕</button>
     </div>
-    <div class="email-iframe-wrap" id="detailHtmlWrap">
-      <iframe id="detailIframe" sandbox="allow-popups allow-same-origin"></iframe>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--c-error);margin-bottom:12px;font-weight:600;">
+        ⚠️ 注意：此密钥仅展示一次，关闭后将无法再次查看，请立即复制并妥善保存！
+      </p>
+      <div class="api-key-box">
+        <span id="newApiKeyVal" style="word-break:break-all;user-select:all;">-</span>
+        <button class="btn btn-sm" onclick="copyApiKeyVal()">复制</button>
+      </div>
     </div>
-    <div class="email-body" id="detailPlainWrap" style="display:none;"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modalApiKey')">我已保存并关闭</button>
+    </div>
   </div>
 </div>
 
+<!-- ========== JAVASCRIPT APPLICATION LOGIC ========== -->
 <script>
+/* =========================================================================
+   1. Global State Management
+   ========================================================================= */
+const state = {
+  currentView: 'accounts',
+  accounts: [],
+  filteredAccounts: [],
+  selectedAccountEmails: new Set(),
+  health: { total: 0, active: 0, expired: 0, needs_reauth: 0 },
+  emailWorkspace: {
+    activeEmail: '',
+    folder: 'inbox',
+    page: 1,
+    pageSize: 30,
+    searchQuery: '',
+    emails: [],
+    totalEmails: 0,
+    selectedMessageId: null,
+    currentDetail: null,
+    currentDetailTab: 'html',
+    detectedOtpCode: null,
+  },
+};
+
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let ACCOUNTS = [];
 
-/* Toast */
-function toast(msg, type = 'info', duration = 3500) {
+/* Clipboard copy with fallback */
+async function copyText(text, successMsg = '已复制到剪贴板') {
+  if (!text) return;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    toast(successMsg, 'success');
+  } catch (err) {
+    toast('复制失败: ' + err.message, 'error');
+  }
+}
+
+/* Toast Notifications */
+function toast(msg, type = 'info', duration = 3000) {
   const container = $('toastContainer');
   const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
   const el = document.createElement('div');
-  el.className = 'toast' + (type === 'success' ? ' toast-success' : type === 'error' ? ' toast-error' : type === 'warning' ? ' toast-warning' : '');
-  el.innerHTML = '<span class="toast-icon">' + (icons[type] || 'ℹ️') + '</span><span class="toast-msg">' + esc(msg) + '</span><span class="toast-close" onclick="this.parentElement.classList.add(\'removing\');setTimeout(()=>this.parentElement.remove(),250)">&times;</span>';
+  el.className = 'toast toast-' + type;
+  el.innerHTML = `
+    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+    <span class="toast-msg">${esc(msg)}</span>
+    <span class="toast-close" onclick="this.parentElement.classList.add('removing');setTimeout(()=>this.parentElement.remove(),200)">&times;</span>
+  `;
   container.appendChild(el);
-  setTimeout(() => { if (el.parentElement) { el.classList.add('removing'); setTimeout(() => el.remove(), 250); } }, duration);
+  setTimeout(() => {
+    if (el.parentElement) {
+      el.classList.add('removing');
+      setTimeout(() => el.remove(), 200);
+    }
+  }, duration);
 }
 
-/* Loading button helper */
-function showLoading(btn) { if (btn) { btn.disabled = true; btn._orig = btn.innerHTML; btn.innerHTML = '<span class="spinner spinner-sm spinner-light"></span>'; } }
-function hideLoading(btn) { if (btn) { btn.disabled = false; if (btn._orig) btn.innerHTML = btn._orig; } }
-
-/* Confirm dialog */
-function confirmDialog(msg) {
+/* Confirm Dialog Promise */
+function confirmDialog(msg, title = '确认操作') {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
-    overlay.className = 'confirm-overlay';
-    overlay.innerHTML = '<div class="confirm-box"><h4>确认操作</h4><p>' + esc(msg) + '</p><div class="confirm-actions"><button class="btn ghost" id="confirmNo">取消</button><button class="btn danger" id="confirmYes">确定</button></div></div>';
+    overlay.className = 'modal-overlay open';
+    overlay.innerHTML = `
+      <div class="modal-card" style="max-width:380px;">
+        <div class="modal-head"><h4>${esc(title)}</h4></div>
+        <div class="modal-body"><p style="font-size:13px;line-height:1.5;color:var(--c-text);">${esc(msg)}</p></div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary btn-sm" id="_confirmNo">取消</button>
+          <button class="btn btn-danger btn-sm" id="_confirmYes">确定</button>
+        </div>
+      </div>
+    `;
     document.body.appendChild(overlay);
-    overlay.querySelector('#confirmNo').onclick = () => { overlay.remove(); resolve(false); };
-    overlay.querySelector('#confirmYes').onclick = () => { overlay.remove(); resolve(true); };
-    overlay.onclick = (e) => { if (e.target === overlay) { overlay.remove(); resolve(false); } };
+    overlay.querySelector('#_confirmNo').onclick = () => { overlay.remove(); resolve(false); };
+    overlay.querySelector('#_confirmYes').onclick = () => { overlay.remove(); resolve(true); };
   });
 }
 
-/* API */
+/* API Client */
 async function api(path, opts = {}) {
-  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
-  if (res.status === 401) { window.location.href = '/login'; throw new Error('未登录'); }
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  if (res.status === 401) {
+    window.location.href = '/login';
+    throw new Error('未登录');
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.detail || ('HTTP ' + res.status));
   return data;
 }
 
-/* Load All */
-async function loadAll() {
-  try {
-    const [list, health] = await Promise.all([ api('/api/accounts'), api('/api/accounts/_health') ]);
-    ACCOUNTS = list.accounts || [];
-    renderAccounts(ACCOUNTS);
-    renderHealth(health);
-    renderEmailSelect(ACCOUNTS);
-  } catch (e) { toast('加载失败: ' + e.message, 'error'); }
-}
+/* Modal Helpers */
+function openModal(id) { $(id)?.classList.add('open'); }
+function closeModal(id) { $(id)?.classList.remove('open'); }
 
-async function doRefresh() {
-  const btn = $('refreshBtn'); btn.classList.add('loading');
-  await loadAll();
-  btn.classList.remove('loading');
-}
-
-function renderHealth(h) {
-  $('healthStats').innerHTML = [
-    ['总数', h.total, ''], ['正常', h.active, 'active'], ['已失效', h.expired, 'expired'], ['需重授权', h.needs_reauth, 'needs_reauth'],
-  ].map(([lbl, num, cls]) => '<div class="stat"><div class="num ' + cls + '">' + num + '</div><div class="lbl">' + lbl + '</div></div>').join('');
-}
-
-function renderAccounts(accounts) {
-  const body = $('accountBody');
-  $('accountCount').textContent = accounts.length ? '— 共 ' + accounts.length + ' 个账户' : '';
-  if (!accounts.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--c-text-muted);font-size:13px;">暂无账户</td></tr>'; return; }
-  body.innerHTML = accounts.map(a => '<tr data-email="' + esc(a.email) + '"><td><strong>' + esc(a.email) + '</strong></td><td><span class="badge ' + esc(a.status) + '"><span class="dot"></span>' + esc(a.status) + '</span></td><td style="color:var(--c-text-muted);font-size:12px;">' + esc(a.email_protocol || 'auto') + '</td><td style="color:var(--c-text-muted);font-size:12px;">' + (a.last_refreshed_at ? esc(new Date(a.last_refreshed_at).toLocaleString()) : '-') + '</td><td style="color:var(--c-text-muted);font-size:12px;">' + esc((a.tags || []).join(', ') || '-') + '</td><td><div class="action-btns"><button class="btn btn-sm" onclick="doRefreshOne(\'' + esc(a.email) + '\')">🔄 刷新</button><button class="btn btn-sm ghost" onclick="doMarkStatus(\'' + esc(a.email) + '\',\'expired\')">⛔ 失效</button><button class="btn btn-sm danger" onclick="doDeleteAccount(\'' + esc(a.email) + '\')">🗑 删除</button></div></td></tr>').join('');
-}
-
-function renderEmailSelect(accounts) {
-  const sel = $('mailEmail'); const prev = sel.value;
-  sel.innerHTML = accounts.map(a => '<option value="' + esc(a.email) + '">' + esc(a.email) + '</option>').join('');
-  if (prev && accounts.some(a => a.email === prev)) sel.value = prev;
-}
-
-/* Batch Import */
-async function doBatchImport() {
-  const btn = $('batchBtn'); const msg = $('batchMsg'); const pw = $('progressWrap');
-  const pf = $('progressFill'); const pl = $('progressLabel'); const po = $('progOk'); const pe = $('progErr');
-  msg.textContent = ''; msg.style.color = 'var(--c-text-muted)';
-  pw.classList.add('active'); pf.style.width = '0%'; pl.textContent = '正在导入…'; po.textContent = '0'; pe.textContent = '0';
-  showLoading(btn);
-  try {
-    const r = await api('/api/accounts/batch', { method: 'POST', body: JSON.stringify({ text: $('batchText').value }) });
-    po.textContent = r.success; pe.textContent = r.failed;
-    pf.style.width = '100%';
-    if (r.failed === 0) {
-      pl.textContent = '✅ 导入完成'; msg.textContent = '成功导入 ' + r.success + ' 个账户'; msg.style.color = 'var(--c-success)';
-      toast('成功导入 ' + r.success + ' 个账户', 'success');
-    } else {
-      pl.textContent = '⚠️ 导入完成（有失败）'; msg.innerHTML = '成功 ' + r.success + '，失败 ' + r.failed + (r.errors.length ? '：<br>' + r.errors.slice(0, 5).map(e => esc(e)).join('<br>') : ''); msg.style.color = 'var(--c-warning)';
-      toast('导入完成：成功 ' + r.success + '，失败 ' + r.failed, r.failed > r.success ? 'error' : 'warning');
+/* =========================================================================
+   2. Intelligent OTP / Verification Code Extractor
+   ========================================================================= */
+function extractOtpCode(subject = '', bodyText = '') {
+  const fullText = (subject + ' ' + bodyText);
+  // Match common patterns: "verification code: 123456", "code is 849201", "your code: AB8491", 4-8 digits standalone
+  const codePatterns = [
+    /(?:code|verification|token|passcode|pin|验证码|校验码|动态码)[^\w\d]{1,12}([A-Za-z0-9]{4,8})\b/i,
+    /\b([0-9]{6})\b/,
+    /\b([0-9]{4})\b/,
+    /\b([0-9]{8})\b/,
+  ];
+  for (const pattern of codePatterns) {
+    const match = fullText.match(pattern);
+    if (match && match[1]) {
+      const candidate = match[1].trim();
+      if (!/^(19|20)\d\d$/.test(candidate)) { // filter out years like 2024, 2025
+        return candidate;
+      }
     }
-    loadAll();
-  } catch (e) { pf.style.width = '0%'; pl.textContent = '❌ 导入失败'; msg.textContent = e.message; msg.style.color = 'var(--c-error)'; toast('导入失败: ' + e.message, 'error'); }
-  hideLoading(btn);
+  }
+  return null;
 }
 
-/* Token Refresh */
-async function doRefreshOne(email) {
-  const btn = event.target; showLoading(btn);
-  try { await api('/api/tokens/' + encodeURIComponent(email) + '/refresh', { method: 'POST' }); toast('刷新成功', 'success'); loadAll(); }
-  catch (e) { toast('刷新失败: ' + e.message, 'error'); }
-  hideLoading(btn);
+/* =========================================================================
+   3. View Navigation & Routing
+   ========================================================================= */
+function switchView(viewName) {
+  state.currentView = viewName;
+  ['Accounts', 'Emails', 'Settings'].forEach(name => {
+    const isTarget = name.toLowerCase() === viewName;
+    $('tabNav' + name).classList.toggle('active', isTarget);
+    $('view' + name).classList.toggle('active', isTarget);
+  });
+  if (viewName === 'settings') {
+    loadSettingsData();
+  }
 }
-async function doRefreshAll() {
-  if (!await confirmDialog('确定刷新所有账户的 Token？')) return;
-  const btn = $('refreshAllBtn'); btn.classList.add('loading');
-  try { const r = await api('/api/tokens/refresh-all', { method: 'POST' }); toast(r.message || '全量刷新完成', 'success'); loadAll(); }
-  catch (e) { toast('全量刷新失败: ' + e.message, 'error'); }
+
+/* Global Data Refresh */
+async function doGlobalRefresh() {
+  const btn = $('hdrRefreshBtn');
+  btn.classList.add('loading');
+  try {
+    await loadAccountsData();
+    if (state.currentView === 'emails' && state.emailWorkspace.activeEmail) {
+      await loadEmailsForCurrentAccount();
+    } else if (state.currentView === 'settings') {
+      await loadSettingsData();
+    }
+    toast('数据已刷新', 'success');
+  } catch (err) {
+    toast('刷新失败: ' + err.message, 'error');
+  }
   btn.classList.remove('loading');
 }
 
-/* Account Management */
-async function doMarkStatus(email, status) {
-  try { await api('/api/accounts/' + encodeURIComponent(email) + '/status', { method: 'PUT', body: JSON.stringify({ status }) }); toast('已标记为 ' + status, 'success'); loadAll(); }
-  catch (e) { toast('操作失败: ' + e.message, 'error'); }
-}
-async function doDeleteAccount(email) {
-  if (!await confirmDialog('确定删除 ' + email + '？此操作不可恢复。')) return;
-  const row = document.querySelector('tr[data-email="' + esc(email) + '"]'); if (row) row.classList.add('row-removing');
-  try { await api('/api/accounts/' + encodeURIComponent(email), { method: 'DELETE' }); toast('账户已删除', 'success'); loadAll(); }
-  catch (e) { toast('删除失败: ' + e.message, 'error'); loadAll(); }
+/* =========================================================================
+   4. Accounts Management Logic
+   ========================================================================= */
+async function loadAccountsData() {
+  try {
+    const [listRes, healthRes] = await Promise.all([
+      api('/api/accounts'),
+      api('/api/accounts/_health'),
+    ]);
+    state.accounts = listRes.accounts || [];
+    state.health = healthRes || { total: 0, active: 0, expired: 0, needs_reauth: 0 };
+    
+    // Update count in navigation badge
+    $('navAccountCount').textContent = state.accounts.length;
+
+    // Render Health Metrics
+    $('statTotal').textContent = state.health.total;
+    $('statActive').textContent = state.health.active;
+    $('statNeedsAuth').textContent = state.health.needs_reauth;
+    $('statExpired').textContent = state.health.expired;
+
+    // Render Accounts Table & workspace options
+    onAccountFilterChange();
+    updateEmailWorkspaceAccountDropdown();
+  } catch (err) {
+    toast('加载账户数据失败: ' + err.message, 'error');
+  }
 }
 
-/* Email */
-async function loadEmails() {
-  const email = $('mailEmail').value; const folder = $('mailFolder').value; const page = $('mailPage').value || 1; const msg = $('mailMsg');
+function onAccountFilterChange() {
+  const search = $('accountSearchInput').value.trim().toLowerCase();
+  const status = $('accountStatusFilter').value;
+  const protocol = $('accountProtocolFilter').value;
+
+  state.filteredAccounts = state.accounts.filter(a => {
+    if (search && !a.email.toLowerCase().includes(search) && !(a.tags || []).some(t => t.toLowerCase().includes(search)) && !(a.note || '').toLowerCase().includes(search)) {
+      return false;
+    }
+    if (status !== 'all' && a.status !== status) return false;
+    if (protocol !== 'all' && (a.email_protocol || 'auto') !== protocol) return false;
+    return true;
+  });
+
+  renderAccountsTable();
+}
+
+function renderAccountsTable() {
+  const tbody = $('accountsTableBody');
+  if (!state.filteredAccounts.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-text-muted);">未找到符合条件的账户</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.filteredAccounts.map(a => {
+    const isSelected = state.selectedAccountEmails.has(a.email);
+    const dateStr = a.last_refreshed_at ? new Date(a.last_refreshed_at).toLocaleString() : '-';
+    const tagBadges = (a.tags || []).map(t => `<span class="badge badge-neutral">${esc(t)}</span>`).join(' ');
+    
+    return `
+      <tr class="${isSelected ? 'selected' : ''}" data-email="${esc(a.email)}">
+        <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="onAccountRowCheckboxToggle('${esc(a.email)}', this.checked)"></td>
+        <td>
+          <div class="email-col">
+            <span style="font-weight:600;">${esc(a.email)}</span>
+            <button class="copy-btn" onclick="copyText('${esc(a.email)}', '邮箱已复制')" title="复制邮箱">📋</button>
+          </div>
+        </td>
+        <td><span class="badge badge-${esc(a.status)}"><span class="dot"></span>${esc(a.status)}</span></td>
+        <td><span class="badge badge-neutral">${esc(a.email_protocol || 'auto')}</span></td>
+        <td style="color:var(--c-text-muted);font-size:12px;">${esc(dateStr)}</td>
+        <td>${tagBadges || '<span style="color:var(--c-text-subtle);font-size:12px;">-</span>'}</td>
+        <td style="text-align:right;">
+          <div style="display:inline-flex;gap:4px;">
+            <button class="btn btn-sm" onclick="jumpToEmailWorkspace('${esc(a.email)}')">📬 查看邮件</button>
+            <button class="btn btn-secondary btn-sm" onclick="doRefreshOneToken('${esc(a.email)}')">🔄 刷新</button>
+            <button class="btn btn-secondary btn-sm" onclick="doMarkStatusOne('${esc(a.email)}', 'expired')" title="手动标记失效">⛔</button>
+            <button class="btn btn-danger btn-sm" onclick="doDeleteAccountOne('${esc(a.email)}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateBatchActionBar();
+}
+
+/* Account Selection Handlers */
+function onAccountRowCheckboxToggle(email, checked) {
+  if (checked) state.selectedAccountEmails.add(email);
+  else state.selectedAccountEmails.delete(email);
+  renderAccountsTable();
+}
+
+function toggleSelectAllAccounts(checked) {
+  if (checked) {
+    state.filteredAccounts.forEach(a => state.selectedAccountEmails.add(a.email));
+  } else {
+    state.selectedAccountEmails.clear();
+  }
+  renderAccountsTable();
+}
+
+function clearAccountSelection() {
+  state.selectedAccountEmails.clear();
+  $('selectAllAccountsCheckbox').checked = false;
+  renderAccountsTable();
+}
+
+function updateBatchActionBar() {
+  const bar = $('batchActionBar');
+  const count = state.selectedAccountEmails.size;
+  $('batchSelectedCount').textContent = count;
+  bar.classList.toggle('active', count > 0);
+}
+
+/* Batch Operations */
+function copySelectedEmails() {
+  const emails = Array.from(state.selectedAccountEmails);
+  if (!emails.length) return;
+  copyText(emails.join('\n'), `已复制 ${emails.length} 个邮箱地址`);
+}
+
+async function batchRefreshSelected() {
+  const emails = Array.from(state.selectedAccountEmails);
+  if (!emails.length) return;
+  toast(`开始批量刷新 ${emails.length} 个账户...`, 'info');
+  let ok = 0, fail = 0;
+  for (const email of emails) {
+    try {
+      await api('/api/tokens/' + encodeURIComponent(email) + '/refresh', { method: 'POST' });
+      ok++;
+    } catch {
+      fail++;
+    }
+  }
+  toast(`批量刷新完成：成功 ${ok}，失败 ${fail}`, ok >= fail ? 'success' : 'warning');
+  loadAccountsData();
+}
+
+async function batchMarkExpiredSelected() {
+  const emails = Array.from(state.selectedAccountEmails);
+  if (!emails.length) return;
+  if (!await confirmDialog(`确定将选中的 ${emails.length} 个账户标记为失效？`)) return;
+  for (const email of emails) {
+    try { await api('/api/accounts/' + encodeURIComponent(email) + '/status', { method: 'PUT', body: JSON.stringify({ status: 'expired' }) }); } catch {}
+  }
+  toast(`已更新 ${emails.length} 个账户状态`, 'success');
+  loadAccountsData();
+}
+
+async function batchDeleteSelected() {
+  const emails = Array.from(state.selectedAccountEmails);
+  if (!emails.length) return;
+  if (!await confirmDialog(`确定永久删除选中的 ${emails.length} 个账户？此操作不可逆！`)) return;
+  for (const email of emails) {
+    try { await api('/api/accounts/' + encodeURIComponent(email), { method: 'DELETE' }); } catch {}
+  }
+  toast(`已删除 ${emails.length} 个账户`, 'success');
+  state.selectedAccountEmails.clear();
+  loadAccountsData();
+}
+
+/* Single Account Operations */
+async function doRefreshOneToken(email) {
+  try {
+    toast(`正在刷新 ${email} Token...`, 'info');
+    await api('/api/tokens/' + encodeURIComponent(email) + '/refresh', { method: 'POST' });
+    toast(`Token 刷新成功: ${email}`, 'success');
+    loadAccountsData();
+  } catch (err) {
+    toast(`刷新失败: ${err.message}`, 'error');
+  }
+}
+
+async function doMarkStatusOne(email, status) {
+  try {
+    await api('/api/accounts/' + encodeURIComponent(email) + '/status', { method: 'PUT', body: JSON.stringify({ status }) });
+    toast(`已标记为 ${status}`, 'success');
+    loadAccountsData();
+  } catch (err) {
+    toast(`操作失败: ${err.message}`, 'error');
+  }
+}
+
+async function doDeleteAccountOne(email) {
+  if (!await confirmDialog(`确定删除账户 ${email}？`)) return;
+  try {
+    await api('/api/accounts/' + encodeURIComponent(email), { method: 'DELETE' });
+    toast('账户已删除', 'success');
+    loadAccountsData();
+  } catch (err) {
+    toast(`删除失败: ${err.message}`, 'error');
+  }
+}
+
+async function doRefreshAllTokens() {
+  if (!await confirmDialog('确定全量刷新所有未失效账户的 Token？')) return;
+  const btn = $('btnRefreshAll');
+  btn.disabled = true;
+  toast('全量刷新任务已提交执行...', 'info');
+  try {
+    const res = await api('/api/tokens/refresh-all', { method: 'POST' });
+    toast(res.message || '全量刷新完成', 'success');
+    loadAccountsData();
+  } catch (err) {
+    toast('全量刷新失败: ' + err.message, 'error');
+  }
+  btn.disabled = false;
+}
+
+/* Add Single Account Form */
+function openAddAccountModal() {
+  $('addEmailInput').value = '';
+  $('addClientIdInput').value = '';
+  $('addRefreshTokenInput').value = '';
+  $('addTagsInput').value = '';
+  $('addNoteInput').value = '';
+  openModal('modalAddAccount');
+}
+
+async function submitAddSingleAccount() {
+  const email = $('addEmailInput').value.trim();
+  const clientId = $('addClientIdInput').value.trim();
+  const refreshToken = $('addRefreshTokenInput').value.trim();
+  const tagsStr = $('addTagsInput').value.trim();
+  const note = $('addNoteInput').value.trim();
+
+  if (!email || !clientId || !refreshToken) {
+    toast('请完整填写邮箱、Client ID 和 Refresh Token', 'warning');
+    return;
+  }
+
+  const tags = tagsStr ? tagsStr.split(/[,， ]+/).filter(Boolean) : [];
+  const btn = $('btnAddAccountSubmit');
+  btn.disabled = true;
+
+  try {
+    await api('/api/accounts', {
+      method: 'POST',
+      body: JSON.stringify({ email, client_id: clientId, refresh_token: refreshToken, tags, note }),
+    });
+    toast('账户添加成功', 'success');
+    closeModal('modalAddAccount');
+    loadAccountsData();
+  } catch (err) {
+    toast('添加失败: ' + err.message, 'error');
+  }
+  btn.disabled = false;
+}
+
+/* Expandable Batch Import */
+function toggleImportBox(show) {
+  const box = $('importBox');
+  if (typeof show === 'boolean') box.classList.toggle('open', show);
+  else box.classList.toggle('open');
+}
+
+async function submitBatchImport() {
+  const text = $('batchImportText').value.trim();
+  if (!text) {
+    toast('请输入批量导入内容', 'warning');
+    return;
+  }
+  const btn = $('btnSubmitBatch');
+  const statusEl = $('importStatusText');
+  btn.disabled = true;
+  statusEl.textContent = '正在解析并导入中...';
+
+  try {
+    const res = await api('/api/accounts/batch', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+    statusEl.innerHTML = `<span style="color:var(--c-success);">成功: ${res.success}</span>，<span style="color:var(--c-error);">失败: ${res.failed}</span>`;
+    toast(`导入完成：成功 ${res.success}，失败 ${res.failed}`, res.failed > 0 ? 'warning' : 'success');
+    $('batchImportText').value = '';
+    loadAccountsData();
+  } catch (err) {
+    statusEl.innerHTML = `<span style="color:var(--c-error);">导入出错: ${esc(err.message)}</span>`;
+    toast('批量导入失败: ' + err.message, 'error');
+  }
+  btn.disabled = false;
+}
+
+/* =========================================================================
+   5. Email Workspace & Split-Pane Reader Logic
+   ========================================================================= */
+function updateEmailWorkspaceAccountDropdown() {
+  const sel = $('emailWorkspaceAccountSelect');
+  const currentVal = state.emailWorkspace.activeEmail;
+  sel.innerHTML = '<option value="">-- 选择查看账户 --</option>' + state.accounts.map(a => `
+    <option value="${esc(a.email)}" ${a.email === currentVal ? 'selected' : ''}>${esc(a.email)} (${esc(a.status)})</option>
+  `).join('');
+}
+
+function jumpToEmailWorkspace(email) {
+  state.emailWorkspace.activeEmail = email;
+  $('emailWorkspaceAccountSelect').value = email;
+  switchView('emails');
+  state.emailWorkspace.page = 1;
+  loadEmailsForCurrentAccount();
+}
+
+function onEmailWorkspaceAccountChange() {
+  state.emailWorkspace.activeEmail = $('emailWorkspaceAccountSelect').value;
+  state.emailWorkspace.page = 1;
+  loadEmailsForCurrentAccount();
+}
+
+function switchEmailFolder(folder) {
+  state.emailWorkspace.folder = folder;
+  $('folderTabInbox').classList.toggle('active', folder === 'inbox');
+  $('folderTabJunk').classList.toggle('active', folder === 'junk');
+  $('folderTabAll').classList.toggle('active', folder === 'all');
+  state.emailWorkspace.page = 1;
+  loadEmailsForCurrentAccount();
+}
+
+function changeEmailPage(delta) {
+  const newPage = state.emailWorkspace.page + delta;
+  if (newPage < 1) return;
+  state.emailWorkspace.page = newPage;
+  loadEmailsForCurrentAccount();
+}
+
+async function doSearchEmails() {
+  const q = $('emailSearchInput').value.trim();
+  state.emailWorkspace.searchQuery = q;
+  state.emailWorkspace.page = 1;
+  loadEmailsForCurrentAccount();
+}
+
+async function refreshEmailsCurrent(forceBypassCache = false) {
+  loadEmailsForCurrentAccount(forceBypassCache);
+}
+
+function exportCsvCurrent() {
+  const email = state.emailWorkspace.activeEmail;
   if (!email) { toast('请先选择账户', 'warning'); return; }
-  msg.textContent = '加载中…'; $('mailList').innerHTML = '<div style="padding:20px;text-align:center;"><div class="spinner" style="margin:0 auto;"></div><div style="color:var(--c-text-muted);font-size:13px;margin-top:8px;">加载中…</div></div>';
-  try {
-    const data = await api('/api/emails/' + encodeURIComponent(email) + '?folder=' + folder + '&page=' + page + '&page_size=20');
-    msg.textContent = '共 ' + data.total_emails + ' 封'; msg.style.color = 'var(--c-text-muted)';
-    const list = $('mailList');
-    if (!data.emails.length) { list.innerHTML = '<div style="color:var(--c-text-muted);font-size:13px;padding:20px;text-align:center;">无邮件</div>'; return; }
-    list.innerHTML = '<div class="email-list">' + data.emails.map(m => '<div class="email-item" onclick="showDetail(\'' + esc(email) + '\',\'' + esc(m.message_id) + '\')"><div class="row-top"><span class="sender-initial">' + esc(m.sender_initial || '?') + '</span><div style="flex:1;min-width:0;"><div class="subj">' + esc(m.subject) + '</div><div class="meta">' + esc(m.from_email) + ' · ' + esc(m.date) + '</div></div></div></div>').join('') + '</div>';
-  } catch (e) { msg.textContent = e.message; msg.style.color = 'var(--c-error)'; $('mailList').innerHTML = '<div style="color:var(--c-error);font-size:13px;padding:20px;text-align:center;">加载失败: ' + esc(e.message) + '</div>'; }
+  window.location.href = `/api/emails/${encodeURIComponent(email)}/export.csv?folder=${state.emailWorkspace.folder}&page_size=500`;
 }
 
-/* Detail Modal & Tabs */
-let currentDetail = null;
+async function loadEmailsForCurrentAccount(refreshCache = false) {
+  const email = state.emailWorkspace.activeEmail;
+  const listEl = $('emailListItems');
 
-function switchDetailTab(tab) {
+  if (!email) {
+    listEl.innerHTML = `<div class="email-detail-empty"><span>📬 请在上方选择要查看的账户</span></div>`;
+    clearDetailPane();
+    return;
+  }
+
+  listEl.innerHTML = `<div style="padding:40px;text-align:center;color:var(--c-text-muted);"><div class="spinner"></div><div style="margin-top:8px;font-size:12px;">正在加载邮件...</div></div>`;
+
+  try {
+    let data;
+    if (state.emailWorkspace.searchQuery) {
+      data = await api(`/api/emails/${encodeURIComponent(email)}/search?q=${encodeURIComponent(state.emailWorkspace.searchQuery)}&folder=${state.emailWorkspace.folder}&limit=50`);
+    } else {
+      data = await api(`/api/emails/${encodeURIComponent(email)}?folder=${state.emailWorkspace.folder}&page=${state.emailWorkspace.page}&page_size=${state.emailWorkspace.pageSize}&refresh=${refreshCache}`);
+    }
+
+    state.emailWorkspace.emails = data.emails || [];
+    state.emailWorkspace.totalEmails = data.total_emails || 0;
+
+    // Pagination info
+    $('emailPageIndicator').textContent = `第 ${state.emailWorkspace.page} 页 / 共 ${state.emailWorkspace.totalEmails} 封`;
+    $('btnPrevPage').disabled = state.emailWorkspace.page <= 1;
+    $('btnNextPage').disabled = state.emailWorkspace.emails.length < state.emailWorkspace.pageSize;
+
+    renderEmailList();
+  } catch (err) {
+    listEl.innerHTML = `<div style="padding:30px;color:var(--c-error);text-align:center;font-size:13px;">加载邮件失败: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderEmailList() {
+  const listEl = $('emailListItems');
+  const emails = state.emailWorkspace.emails;
+
+  if (!emails.length) {
+    listEl.innerHTML = `<div class="email-detail-empty"><div style="font-size:28px;">📭</div><div style="font-size:13px;">该文件夹暂无邮件</div></div>`;
+    clearDetailPane();
+    return;
+  }
+
+  listEl.innerHTML = emails.map(m => {
+    const isSelected = m.message_id === state.emailWorkspace.selectedMessageId;
+    const otp = extractOtpCode(m.subject, '');
+    
+    return `
+      <div class="email-card ${isSelected ? 'active' : ''}" onclick="selectEmailDetail('${esc(m.message_id)}')">
+        <div class="email-card-top">
+          <div class="email-sender" title="${esc(m.from_email)}">${esc(m.from_email || '未知发件人')}</div>
+          <div class="email-date">${esc(m.date || '')}</div>
+        </div>
+        <div class="email-subject" title="${esc(m.subject)}">${esc(m.subject || '(无主题)')}</div>
+        <div class="email-card-bottom">
+          <span class="email-badge-folder">${esc(m.folder || state.emailWorkspace.folder)}</span>
+          ${otp ? `<button class="code-pill" onclick="event.stopPropagation();copyText('${esc(otp)}', '验证码已复制: ${esc(otp)}')">🔑 ${esc(otp)} 复制</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Auto-select first email if none selected
+  if (!state.emailWorkspace.selectedMessageId && emails.length > 0) {
+    selectEmailDetail(emails[0].message_id);
+  }
+}
+
+async function selectEmailDetail(messageId) {
+  state.emailWorkspace.selectedMessageId = messageId;
+  renderEmailList();
+
+  const emptyEl = $('detailEmptyState');
+  const contentEl = $('detailContentState');
+  emptyEl.style.display = 'none';
+  contentEl.style.display = 'flex';
+
+  $('detailSubjectText').textContent = '加载中...';
+  $('detailFromText').textContent = '...';
+  $('detailToText').textContent = '...';
+  $('detailDateText').textContent = '...';
+  $('detailOtpBanner').style.display = 'none';
+
+  const iframe = $('detailIframe');
+  iframe.srcdoc = `<!DOCTYPE html><html><body style="font-family:sans-serif;color:#64748b;display:flex;align-items:center;justify-content:center;height:200px;"><div style="text-align:center;">正在获取邮件正文...</div></body></html>`;
+
+  try {
+    const email = state.emailWorkspace.activeEmail;
+    const d = await api(`/api/emails/${encodeURIComponent(email)}/${encodeURIComponent(messageId)}`);
+    state.emailWorkspace.currentDetail = d;
+
+    $('detailSubjectText').textContent = d.subject || '(无主题)';
+    $('detailFromText').textContent = d.from_email || '-';
+    $('detailToText').textContent = d.to_email || '-';
+    $('detailDateText').textContent = d.date || '-';
+
+    // OTP detection from body & subject
+    const detectedOtp = extractOtpCode(d.subject, d.body_plain || d.body_html || '');
+    state.emailWorkspace.detectedOtpCode = detectedOtp;
+    if (detectedOtp) {
+      $('detailOtpCodeVal').textContent = detectedOtp;
+      $('detailOtpBanner').style.display = 'flex';
+    } else {
+      $('detailOtpBanner').style.display = 'none';
+    }
+
+    // Render HTML in sandboxed Iframe
+    const htmlBody = d.body_html || (d.body_plain ? `<pre style="white-space:pre-wrap;font-family:inherit;line-height:1.6;">${esc(d.body_plain)}</pre>` : '<div style="color:#94a3b8;padding:20px;">(无正文)</div>');
+    renderDetailIframe(iframe, htmlBody);
+
+    // Plain text container
+    $('detailPlainBox').textContent = d.body_plain || d.body_html || '(无纯文本正文)';
+
+    switchDetailBodyTab(state.emailWorkspace.currentDetailTab);
+  } catch (err) {
+    $('detailSubjectText').textContent = '邮件详情加载失败';
+    renderDetailIframe(iframe, `<div style="color:#ef4444;padding:24px;">加载失败: ${esc(err.message)}</div>`);
+  }
+}
+
+function clearDetailPane() {
+  $('detailEmptyState').style.display = 'flex';
+  $('detailContentState').style.display = 'none';
+  state.emailWorkspace.selectedMessageId = null;
+  state.emailWorkspace.currentDetail = null;
+}
+
+function switchDetailBodyTab(tab) {
+  state.emailWorkspace.currentDetailTab = tab;
   const isHtml = tab === 'html';
-  $('tabBtnHtml').classList.toggle('active', isHtml);
-  $('tabBtnPlain').classList.toggle('active', !isHtml);
-  $('detailHtmlWrap').style.display = isHtml ? 'block' : 'none';
-  $('detailPlainWrap').style.display = isHtml ? 'none' : 'block';
-  if (isHtml && $('detailIframe')) {
-    adjustIframeHeight($('detailIframe'));
-  }
+  $('tabBtnDetailHtml').className = isHtml ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-ghost';
+  $('tabBtnDetailPlain').className = !isHtml ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-ghost';
+  $('detailIframeBox').style.display = isHtml ? 'block' : 'none';
+  $('detailPlainBox').style.display = isHtml ? 'none' : 'block';
 }
 
-function adjustIframeHeight(iframe) {
-  try {
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    if (!doc) return;
-    const body = doc.body;
-    const html = doc.documentElement;
-    const contentHeight = Math.max(
-      body ? body.scrollHeight : 0,
-      body ? body.offsetHeight : 0,
-      html ? html.clientHeight : 0,
-      html ? html.scrollHeight : 0,
-      html ? html.offsetHeight : 0
-    );
-    const targetHeight = Math.min(Math.max(contentHeight + 24, 280), 650);
-    iframe.style.height = targetHeight + 'px';
-  } catch (e) {
-    iframe.style.height = '420px';
-  }
-}
-
-function renderIframeContent(iframe, rawHtml) {
+function renderDetailIframe(iframe, contentHtml) {
   const csp = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: http: data: cid: blob:; style-src 'unsafe-inline'; font-src https: data:; base-uri 'none';">`;
   const baseTarget = `<base target="_blank">`;
   const resetStyle = `<style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #1e293b; margin: 16px; word-break: break-word; background: #fff; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #1e293b; margin: 18px; word-break: break-word; background: #fff; }
     img { max-width: 100%; height: auto; }
     table { max-width: 100% !important; }
     a { color: #2563eb; }
   </style>`;
-
-  const content = rawHtml || '<div style="color:#64748b;padding:24px;text-align:center;">(无富文本正文)</div>';
-  const docHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">${csp}${baseTarget}${resetStyle}</head><body>${content}</body></html>`;
-
-  iframe.onload = () => adjustIframeHeight(iframe);
-  iframe.srcdoc = docHtml;
+  iframe.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8">${csp}${baseTarget}${resetStyle}</head><body>${contentHtml}</body></html>`;
 }
 
-async function showDetail(email, messageId) {
-  const modal = $('detailModal');
-  modal.classList.add('open');
-  switchDetailTab('html');
-  $('detailTitle').textContent = '邮件详情';
-  $('detailFrom').textContent = '';
-  $('detailTo').textContent = '';
-  $('detailDate').textContent = '';
-  $('detailPlainWrap').textContent = '加载中…';
-
-  const iframe = $('detailIframe');
-  iframe.srcdoc = '<!DOCTYPE html><html><body style="font-family:sans-serif;color:#64748b;display:flex;align-items:center;justify-content:center;height:120px;"><div style="text-align:center;">加载中…</div></body></html>';
-
-  try {
-    const d = await api('/api/emails/' + encodeURIComponent(email) + '/' + encodeURIComponent(messageId));
-    currentDetail = d;
-    $('detailTitle').textContent = d.subject || '(无主题)';
-    $('detailFrom').textContent = '📧 发件人: ' + (d.from_email || '');
-    $('detailTo').textContent = '📨 收件人: ' + (d.to_email || '');
-    $('detailDate').textContent = '📅 日期: ' + (d.date || '');
-
-    // 富文本视图：优先使用 body_html，若无则转义 body_plain 包装成 pre
-    const htmlBody = d.body_html || (d.body_plain ? '<pre style="white-space:pre-wrap;font-family:inherit;">' + esc(d.body_plain) + '</pre>' : '');
-    renderIframeContent(iframe, htmlBody);
-
-    // 纯文本视图
-    $('detailPlainWrap').textContent = d.body_plain || d.body_html || '(无正文)';
-  } catch (e) {
-    $('detailTitle').textContent = '加载失败';
-    renderIframeContent(iframe, '<div style="color:#ef4444;padding:20px;">加载失败: ' + esc(e.message) + '</div>');
-    $('detailPlainWrap').textContent = '加载失败: ' + e.message;
+function copyDetectedOtp() {
+  if (state.emailWorkspace.detectedOtpCode) {
+    copyText(state.emailWorkspace.detectedOtpCode, `验证码已复制: ${state.emailWorkspace.detectedOtpCode}`);
   }
 }
-function closeModal() { $('detailModal').classList.remove('open'); }
-$('detailModal').addEventListener('click', e => { if (e.target === $('detailModal')) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-function exportCsv() {
-  const email = $('mailEmail').value; if (!email) { toast('请先选择账户', 'warning'); return; }
-  window.location.href = '/api/emails/' + encodeURIComponent(email) + '/export.csv?folder=' + $('mailFolder').value + '&page_size=500';
+function copyDetailPlain() {
+  const d = state.emailWorkspace.currentDetail;
+  if (d) {
+    copyText(d.body_plain || d.body_html || '', '邮件正文已复制');
+  }
 }
-async function doLogout() { try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {} window.location.href = '/login'; }
 
-loadAll();
+/* =========================================================================
+   6. Settings & Security Logic
+   ========================================================================= */
+async function loadSettingsData() {
+  try {
+    const sec = await api('/api/admin/security/status');
+    // API Key Badge
+    const badge = $('apiKeyStatusBadge');
+    if (sec.api_key_configured) {
+      badge.className = 'badge badge-active';
+      badge.textContent = '🟢 已配置生效中';
+      $('btnDeleteApiKey').style.display = 'inline-flex';
+    } else {
+      badge.className = 'badge badge-expired';
+      badge.textContent = '⚪ 未配置';
+      $('btnDeleteApiKey').style.display = 'none';
+    }
+
+    // Security locked IPs
+    const lockedIps = sec.locked_ips || [];
+    const secBody = $('securityStatusBody');
+    secBody.innerHTML = `
+      <div style="margin-bottom:8px;">• 连续失败锁定阈值: <b>${sec.lock_threshold} 次</b> | 封禁时长: <b>${sec.lock_duration_seconds} 秒</b></div>
+      <div>• 当前被临时封禁 IP 列表:</div>
+      <div style="margin-top:6px;padding:8px 12px;background:var(--c-bg);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;">
+        ${lockedIps.length ? lockedIps.map(ip => `<div>🚫 ${esc(ip)}</div>`).join('') : '<span style="color:var(--c-success);">🛡️ 暂无被封禁的 IP，系统运行正常</span>'}
+      </div>
+    `;
+  } catch (err) {
+    toast('获取安全状态失败: ' + err.message, 'error');
+  }
+}
+
+async function rotateApiKeyAction() {
+  if (!await confirmDialog('确定轮换或生成新的 API Key？原有的 API Key 将立即失效！')) return;
+  try {
+    const res = await api('/api/admin/api-key/rotate', { method: 'POST' });
+    $('newApiKeyVal').textContent = res.api_key;
+    openModal('modalApiKey');
+    loadSettingsData();
+  } catch (err) {
+    toast('轮换 API Key 失败: ' + err.message, 'error');
+  }
+}
+
+async function deleteApiKeyAction() {
+  if (!await confirmDialog('确定删除当前的 API Key？删除后所有基于 API Key 的脚本将无法访问！')) return;
+  try {
+    await api('/api/admin/api-key', { method: 'DELETE' });
+    toast('API Key 已删除', 'success');
+    loadSettingsData();
+  } catch (err) {
+    toast('删除失败: ' + err.message, 'error');
+  }
+}
+
+function copyApiKeyVal() {
+  copyText($('newApiKeyVal').textContent, 'API Key 已复制');
+}
+
+async function triggerSchedulerNow() {
+  toast('正在触发后台调度器...', 'info');
+  try {
+    const res = await api('/api/tokens/trigger-scheduler', { method: 'POST' });
+    toast(res.message || '调度器已触发并在后台运行', 'success');
+  } catch (err) {
+    toast('触发失败: ' + err.message, 'error');
+  }
+}
+
+/* =========================================================================
+   7. Auth & Keyboard Shortcuts
+   ========================================================================= */
+async function doLogout() {
+  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+  window.location.href = '/login';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal('modalAddAccount');
+    closeModal('modalApiKey');
+  }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    if (state.currentView === 'accounts') $('accountSearchInput')?.focus();
+    else if (state.currentView === 'emails') $('emailSearchInput')?.focus();
+  }
+});
+
+/* Initialize */
+loadAccountsData();
 </script>
 </body>
 </html>
