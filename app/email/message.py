@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import email
 import re
+from datetime import datetime, timezone
 from email.header import decode_header
 from email.utils import parsedate_to_datetime
 
@@ -168,7 +169,6 @@ def format_date(date_str: str) -> str:
             return dt.astimezone().isoformat()
     except Exception:  # noqa: BLE001
         pass
-    from datetime import datetime, timezone
     return datetime.now(timezone.utc).astimezone().isoformat()
 
 

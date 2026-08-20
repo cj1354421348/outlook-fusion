@@ -93,6 +93,8 @@ async def refresh_token_for_account(repo: AccountRepository, account: Account) -
     encrypted = encrypt_token(new_token or plain_token)
     updated = await repo.update_refresh_token(account.email, encrypted)
     await repo.record_token_success(account.email)
+    from app.oauth.access import invalidate_access_token
+    invalidate_access_token(account.email)
     if updated is None:
         logger.error("update_refresh_token 返回 None: %s", account.email)
 

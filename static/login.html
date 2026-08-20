@@ -6,149 +6,170 @@
 <title>Outlook Fusion - 登录</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  html, body {
+    width: 100%; min-height: 100%; height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background-color: #0f172a;
     background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #2563eb 100%);
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    padding: 20px; position: relative; overflow: hidden;
+    color: #1e293b;
   }
-  body::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse at 30% 20%, rgba(37,99,235,.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 80%, rgba(59,130,246,.1) 0%, transparent 50%);
-    pointer-events: none;
+  body {
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
   }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px) scale(.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
   }
 
-  .card {
-    background: rgba(255,255,255,.95); backdrop-filter: blur(20px);
-    border-radius: 16px; padding: 44px 40px; width: 100%; max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.1);
-    animation: fadeUp .5s cubic-bezier(0.16, 1, 0.3, 1) both;
-    position: relative; z-index: 1;
+  .login-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.1);
+    animation: fadeUp .4s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-  .logo {
-    width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  .logo-box {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 16px; font-size: 22px; color: #fff;
-    box-shadow: 0 4px 12px rgba(37,99,235,.3);
+    margin: 0 auto 16px; font-size: 24px; color: #fff;
+    box-shadow: 0 4px 14px rgba(37,99,235,.35);
   }
-  h1 { font-size: 22px; text-align: center; color: #1e293b; font-weight: 700; }
-  .sub { text-align: center; color: #64748b; font-size: 13px; margin: 4px 0 32px; }
-  label { display: block; font-size: 13px; font-weight: 500; color: #475569; margin: 16px 0 6px; }
+  h1 { font-size: 22px; text-align: center; color: #0f172a; font-weight: 700; margin-bottom: 6px; }
+  .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 28px; }
+  
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
   .input-wrap { position: relative; }
   .input-wrap .icon {
     position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    color: #94a3b8; font-size: 16px; pointer-events: none; transition: color .2s;
+    font-size: 16px; color: #94a3b8; pointer-events: none;
   }
   input {
-    width: 100%; padding: 11px 12px 11px 38px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    width: 100%; padding: 11px 12px 11px 38px; border: 1.5px solid #cbd5e1; border-radius: 8px;
     font-size: 14px; outline: none; transition: all .2s;
-    background: #f8fafc; color: #1e293b;
+    background: #f8fafc; color: #0f172a;
   }
-  input:hover { border-color: #cbd5e1; }
   input:focus {
-    border-color: #2563eb; background: #fff;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    border-color: #2563eb; background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
   }
   input::placeholder { color: #94a3b8; }
+  
   button {
-    width: 100%; margin-top: 24px; padding: 12px; border: none; border-radius: 8px;
+    width: 100%; margin-top: 10px; padding: 12px; border: none; border-radius: 8px;
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
-    transition: all .2s; position: relative; overflow: hidden;
+    transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   button:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.35); }
   button:active { transform: translateY(0); }
   button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-  .btn-spinner {
-    display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3);
+  
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.3);
     border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite;
-    margin: 0 auto;
   }
-  button.loading .btn-text { display: none; }
-  button.loading .btn-spinner { display: block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .error {
+  .error-msg {
     color: #ef4444; font-size: 13px; margin-top: 14px; text-align: center;
-    min-height: 20px; transition: all .2s;
+    min-height: 20px; word-break: break-word;
   }
-  .error.shake { animation: shake .4s ease; }
+  .error-msg.shake { animation: shake .35s ease; }
   .footer { text-align: center; margin-top: 24px; font-size: 12px; color: #94a3b8; }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">📧</div>
+<div class="login-card">
+  <div class="logo-box">📧</div>
   <h1>Outlook Fusion</h1>
   <div class="sub">邮箱账户全生命周期管理</div>
+  
   <form id="loginForm">
-    <label for="username">用户名</label>
-    <div class="input-wrap">
-      <span class="icon">👤</span>
-      <input id="username" placeholder="输入用户名" autocomplete="username" required>
+    <div class="form-group">
+      <label for="username">用户名</label>
+      <div class="input-wrap">
+        <span class="icon">👤</span>
+        <input id="username" placeholder="输入管理员用户名" autocomplete="username" required autofocus>
+      </div>
     </div>
-    <label for="password">密码</label>
-    <div class="input-wrap">
-      <span class="icon">🔒</span>
-      <input id="password" type="password" placeholder="输入密码" autocomplete="current-password" required>
+    
+    <div class="form-group">
+      <label for="password">密码</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input id="password" type="password" placeholder="输入管理员密码" autocomplete="current-password" required>
+      </div>
     </div>
+    
     <button type="submit" id="loginBtn">
-      <span class="btn-text">登 录</span>
-      <div class="btn-spinner"></div>
+      <span id="btnText">登 录</span>
+      <div id="btnSpinner" class="spinner" style="display:none;"></div>
     </button>
-    <div class="error" id="error"></div>
+    
+    <div class="error-msg" id="errorMsg"></div>
   </form>
-  <div class="footer">Outlook Fusion v0.1</div>
+  
+  <div class="footer">Outlook Fusion v0.1.0</div>
 </div>
+
 <script>
 const form = document.getElementById('loginForm');
 const btn = document.getElementById('loginBtn');
-const err = document.getElementById('error');
+const btnText = document.getElementById('btnText');
+const btnSpinner = document.getElementById('btnSpinner');
+const errMsg = document.getElementById('errorMsg');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  err.textContent = ''; err.classList.remove('shake');
-  btn.classList.add('loading');
+  errMsg.textContent = '';
+  errMsg.classList.remove('shake');
+  
+  btn.disabled = true;
+  btnText.style.display = 'none';
+  btnSpinner.style.display = 'block';
+
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: document.getElementById('username').value,
+        username: document.getElementById('username').value.trim(),
         password: document.getElementById('password').value,
       }),
     });
+
     if (res.ok) {
-      btn.classList.remove('loading');
-      btn.querySelector('.btn-text').textContent = '✓ 登录成功';
-      setTimeout(() => { window.location.href = '/'; }, 300);
+      btnText.textContent = '✓ 登录成功';
+      btnText.style.display = 'block';
+      btnSpinner.style.display = 'none';
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 250);
     } else {
       const data = await res.json().catch(() => ({}));
-      err.textContent = data.detail || '用户名或密码错误';
-      err.classList.add('shake');
+      errMsg.textContent = data.detail || '用户名或密码错误';
+      errMsg.classList.add('shake');
+      btn.disabled = false;
+      btnText.style.display = 'block';
+      btnSpinner.style.display = 'none';
     }
   } catch (ex) {
-    err.textContent = '网络错误: ' + ex.message;
-    err.classList.add('shake');
+    errMsg.textContent = '网络请求异常: ' + ex.message;
+    errMsg.classList.add('shake');
+    btn.disabled = false;
+    btnText.style.display = 'block';
+    btnSpinner.style.display = 'none';
   }
-  btn.classList.remove('loading');
 });
 </script>
 </body>
