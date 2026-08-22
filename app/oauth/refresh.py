@@ -82,6 +82,11 @@ async def detect_protocol(account: Account) -> str:
 
 async def refresh_token_for_account(repo: AccountRepository, account: Account) -> None:
     """刷新单个账户 token，自动选协议。探测后按已知协议刷新。"""
+    if not account.email_protocol or account.email_protocol == "auto":
+        protocol = await detect_protocol(account)
+        await repo.update_protocol(account.email, protocol)
+        account.email_protocol = protocol
+
     plain_token = decrypt_token(account.refresh_token)
     scope = get_scope_for_protocol(account.email_protocol)
 

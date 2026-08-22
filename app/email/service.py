@@ -9,7 +9,7 @@ from app.db.models import Account
 from app.email import cache as cache_mod
 from app.email import graph as graph_provider
 from app.email import imap as imap_provider
-from app.oauth import PROTOCOL_GRAPH, PROTOCOL_IMAP
+from app.oauth import PROTOCOL_GRAPH, PROTOCOL_IMAP, detect_protocol
 from app.oauth.access import fetch_access_token
 from app.schemas import DualViewEmailResponse, EmailDetailsResponse, EmailListResponse
 
@@ -30,6 +30,22 @@ class EmailService:
             raise HTTPException(status_code=403, detail=f"账户不可用: {reason}")
         return account
 
+    async def _resolve_account_and_token(
+        self, repo: AccountRepository, email: str
+    ) -> tuple[Account, str, str]:
+        """获取可用账户，确保协议已决议（消除 auto 伪状态），返回 (account, protocol, token)。"""
+        account = await self._get_active_account(repo, email)
+        protocol = account.email_protocol
+        if not protocol or protocol == "auto":
+            protocol = await detect_protocol(account)
+            await repo.update_protocol(account.email, protocol)
+            if account.refresh_token:
+                await repo.update_refresh_token(account.email, account.refresh_token)
+            account.email_protocol = protocol
+
+        token = await fetch_access_token(account, protocol=protocol)
+        return account, protocol, token
+
     async def list_emails(
         self,
         repo: AccountRepository,
@@ -39,15 +55,13 @@ class EmailService:
         page_size: int,
         refresh: bool = False,
     ) -> EmailListResponse:
-        account = await self._get_active_account(repo, email)
         cache_key = self._cache_key(email, folder, page, page_size)
         if not refresh:
             cached = cache_mod.email_cache.get(cache_key)
             if cached:
                 return cached
 
-        protocol = account.email_protocol or PROTOCOL_IMAP
-        token = await fetch_access_token(account, protocol=protocol)
+        account, protocol, token = await self._resolve_account_and_token(repo, email)
 
         try:
             if protocol == PROTOCOL_GRAPH:
@@ -74,16 +88,13 @@ class EmailService:
         email: str,
         message_id: str,
     ) -> EmailDetailsResponse:
-        account = await self._get_active_account(repo, email)
+        account, protocol, token = await self._resolve_account_and_token(repo, email)
 
         # message_id 格式: "文件夹-序号"（IMAP）；Graph 原生 id 无分隔符
         folder_name = "INBOX"
         msg_id = message_id
         if "-" in message_id:
             folder_name, msg_id = message_id.split("-", 1)
-
-        protocol = account.email_protocol or PROTOCOL_IMAP
-        token = await fetch_access_token(account, protocol=protocol)
 
         try:
             if protocol == PROTOCOL_GRAPH:
@@ -121,9 +132,7 @@ class EmailService:
         folder: str,
         limit: int,
     ) -> EmailListResponse:
-        account = await self._get_active_account(repo, email)
-        protocol = account.email_protocol or PROTOCOL_IMAP
-        token = await fetch_access_token(account, protocol=protocol)
+        account, protocol, token = await self._resolve_account_and_token(repo, email)
 
         try:
             if protocol == PROTOCOL_GRAPH:
